@@ -1,0 +1,240 @@
+/* ================================================================
+   FORM-BUILDER — Parent form wrapper
+   Bootstrap compatible — Plus Jakarta Sans — Orange/Black/White
+================================================================ */
+
+:host {
+  --fb-border:   var(--art-border);
+  --fb-bg:       var(--art-surface);
+  --fb-surface:  var(--art-bg);
+  --fb-hover:    var(--art-primary-soft);
+  --fb-accent:   var(--art-primary);
+  --fb-primary:  var(--art-primary);
+  --fb-neutral:  var(--art-inverse-surface);
+  --fb-text:     var(--art-text);
+  --fb-text-2:   var(--art-text-muted);
+  --fb-text-3:   var(--art-text-subtle);
+  --fb-danger:   var(--art-danger);
+  --fb-success:  var(--art-success);
+  --shadow-sm:   var(--art-shadow-sm);
+  --ease: var(--art-easing-standard);
+  --dur: var(--art-duration-base);
+  display: block;
+  font-family: var(--art-font-sans);
+}
+
+/* ── Main wrapper ────────────────────────────────────────────── */
+.fb-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--art-space-4);
+}
+
+/* ── Section ─────────────────────────────────────────────────── */
+.fb-section {
+  background: var(--fb-bg);
+  border: var(--art-border-width) solid var(--fb-border);
+  border-radius: var(--art-radius-lg);
+  /* pas de overflow:hidden — les coins sont gérés par les enfants directs */
+  box-shadow: var(--shadow-sm);
+}
+
+/* Le premier enfant arrondit les coins du haut,
+   le dernier arrondit les coins du bas.
+   Quand le body est masqué (section collapsed), le header est
+   à la fois :first-child et :last-child → 4 coins arrondis. */
+.fb-section > :first-child {
+  border-top-left-radius:  var(--art-radius-md);   /* parent 10px - border 1px */
+  border-top-right-radius: var(--art-radius-md);
+}
+.fb-section > :last-child {
+  border-bottom-left-radius:  var(--art-radius-md);
+  border-bottom-right-radius: var(--art-radius-md);
+}
+
+/* Section header */
+.fb-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--art-space-2-5) var(--art-space-3);
+  cursor: pointer;
+  user-select: none;
+  border-bottom: var(--art-border-width) solid var(--fb-border);
+  transition: background var(--dur) var(--ease);
+  gap: var(--art-space-3);
+  background: var(--fb-surface);
+}
+.fb-section-header:hover { background: var(--fb-hover); }
+
+.fb-section-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--art-space-3);
+  min-width: 0;
+}
+
+.fb-section-icon {
+  width: 36px; height: 36px;
+  background: var(--fb-neutral);
+  border-radius: var(--art-radius-md);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--art-shadow-sm);
+}
+.fb-section-icon .material-symbols-outlined {
+  color: var(--art-text-inverse);
+  font-size: var(--art-text-xl);
+}
+
+.fb-section-title {
+  font-size: var(--art-text-md);
+  font-weight: var(--art-weight-bold);
+  color: var(--fb-text);
+  margin: 0;
+  letter-spacing: -.02em;
+}
+.fb-section-subtitle {
+  font-size: var(--art-text-sm);
+  color: var(--fb-text-3);
+  margin: var(--art-space-0-5) 0 0;
+}
+
+.fb-section-chevron {
+  font-size: var(--art-text-2xl);
+  color: var(--fb-text-3);
+  flex-shrink: 0;
+  transition: transform var(--dur) var(--ease);
+}
+
+/* Section body */
+.fb-section-body {
+  padding: var(--art-space-3);
+  animation: sectionOpen var(--art-duration-base) var(--ease) both;
+}
+@media (max-width: 575px) {
+  .fb-section-body { padding: var(--art-space-3-5); }
+}
+
+/* ── Action buttons bar ──────────────────────────────────────── */
+.fb-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--art-space-2-5);
+  padding: var(--art-space-2-5) var(--art-space-3);
+  background: var(--fb-bg);
+  border: var(--art-border-width) solid var(--fb-border);
+  border-radius: var(--art-radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+@media (max-width: 575px) {
+  .fb-actions { padding: var(--art-space-3); }
+}
+
+.fb-actions-left {
+  display: flex;
+  align-items: center;
+  gap: var(--art-space-2);
+  flex-wrap: wrap;
+}
+.fb-actions-right {
+  display: flex;
+  align-items: center;
+  gap: var(--art-space-2);
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+/* Mobile : passage en colonne, plus de display flex horizontal */
+.fb-actions--mobile {
+  flex-direction: column;
+  align-items: stretch;
+}
+.fb-actions--mobile .fb-actions-left,
+.fb-actions--mobile .fb-actions-right {
+  width: 100%;
+  margin-left: 0;
+  flex-direction: column;
+}
+.fb-actions--mobile .fb-action-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Action button base */
+.fb-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--art-space-1-5);
+  padding: 0 var(--art-space-4-5);
+  height: 38px;
+  border-radius: var(--art-radius-md);
+  font-size: var(--art-text-base);
+  font-weight: var(--art-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all var(--dur) var(--ease);
+  white-space: nowrap;
+}
+.fb-action-btn .material-symbols-outlined { font-size: var(--art-text-xl); }
+
+.fb-action-btn--reset {
+  background: var(--art-surface);
+  color: var(--fb-text-2);
+  border-color: var(--fb-border);
+}
+.fb-action-btn--reset:hover {
+  background: var(--art-danger-soft);
+  border-color: var(--art-danger-border);
+  color: var(--fb-danger);
+}
+
+.fb-action-btn--save {
+  background: var(--fb-neutral);
+  color: var(--art-text-inverse);
+  border-color: var(--fb-neutral);
+}
+.fb-action-btn--save:hover {
+  background: var(--fb-accent);
+  border-color: var(--fb-accent);
+}
+
+.fb-action-btn--primary {
+  background: var(--fb-primary);
+  color: var(--art-text-inverse);
+  border-color: var(--fb-primary);
+}
+.fb-action-btn--primary:hover { background: var(--art-primary-hover); border-color: var(--art-primary-strong); }
+
+.fb-action-btn--danger {
+  background: var(--art-surface);
+  color: var(--fb-danger);
+  border-color: var(--art-danger-border);
+}
+.fb-action-btn--danger:hover { background: var(--art-danger-soft); }
+
+.fb-action-btn--success {
+  background: var(--art-surface);
+  color: var(--fb-success);
+  border-color: var(--art-success-border);
+}
+.fb-action-btn--success:hover { background: var(--art-success-soft); }
+
+.fb-action-btn--default {
+  background: var(--art-surface-subtle);
+  color: var(--fb-text-2);
+  border-color: var(--fb-border);
+}
+.fb-action-btn--default:hover { background: var(--art-surface-muted); }
+
+/* ── Animations ──────────────────────────────────────────────── */
+@keyframes sectionOpen {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Bouton de repli de section (clavier + lecteurs d'écran) ; le clic sur l'en-tête reste actif à la souris. */
+.fb-section-toggle { display: inline-grid; place-items: center; padding: 0; color: inherit; background: transparent; border: 0; border-radius: var(--art-radius-sm); cursor: pointer; }

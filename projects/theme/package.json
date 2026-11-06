@@ -1,0 +1,16 @@
+{
+  "name": "@artis/theme",
+  "version": "1.1.0",
+  "description": "Tokens CSS, thèmes prêts à l'emploi et ThemeService pour la Direction Artistique Artis.",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": [
+    "*.css"
+  ]
+}

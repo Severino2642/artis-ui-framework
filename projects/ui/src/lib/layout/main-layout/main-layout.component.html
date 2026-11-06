@@ -1,0 +1,41 @@
+<art-sidebar
+  [alternatePanel]="alternatePanel"
+  [navItems]="items"
+  [activeSideBar]="activeSideBar"
+  [user]="user"
+  [brandName]="brandName"
+  [logoUrl]="logoUrl"
+  (itemSelected)="onItemSelected($event)"
+  (onUserButtonClick)="onUserButton($event)"
+  (widthChange)="onSidebarWidth($event)"
+  (resizingChange)="onResizing($event)"
+>
+  <ng-content select="[artSidebarPanel]" ngProjectAs="[artSidebarPanel]"></ng-content>
+</art-sidebar>
+<main
+  class="main-content"
+  [style.--main-margin-left.px]="sidebarWidthPx"
+  [class.main-content--resizing]="isSidebarResizing"
+>
+  <art-header
+    [pageTitle]="title"
+    [breadcrumbs]="breadcrumbs()"
+    [notifications]="notifications"
+    [user]="user"
+    [profileMenuItems]="profileMenuItems"
+    [searchPlaceholder]="searchPlaceholder"
+    [sidebarWidth]="sidebarWidthPx"
+    [sidebarCollapsed]="false"
+    (searchSubmit)="search.emit($event)"
+    (breadcrumbClick)="breadcrumbClick.emit($event)"
+    (notificationRead)="notificationRead.emit($event)"
+    (profileAction)="onProfile($event)"
+    (helpClick)="help.emit()"
+  />
+  <div class="content-area">
+    <router-outlet />
+  </div>
+  @if (showFooter) {
+    <art-footer [linkGroups]="footerLinkGroups" variant="minimal" />
+  }
+</main>

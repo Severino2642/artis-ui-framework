@@ -1,0 +1,16 @@
+<div class="container-fluid py-3">
+  <art-form-builder
+    #formRef
+    [config]="venteFormConfig"
+    [childConfig]="venteDetailsConfig"
+    (formAction)="onFormAction($event)"
+    (fieldButtonClick)="onFieldButton($event)"
+    (childFieldButtonClick)="onChildFieldButton($event)"
+  ></art-form-builder>
+
+  <!-- Debug output -->
+  <div class="mt-3 p-3" style="background:#F5F4F2;border-radius:10px;font-size:12px" *ngIf="lastEvent">
+    <strong>Dernier événement :</strong>
+    <pre style="margin:6px 0 0;white-space:pre-wrap">{{ lastEvent | json }}</pre>
+  </div>
+</div>

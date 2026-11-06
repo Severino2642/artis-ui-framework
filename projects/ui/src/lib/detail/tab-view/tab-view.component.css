@@ -1,0 +1,274 @@
+/* ================================================================
+   TAB-VIEW — Onglets style "browser tab" (MacBook / Google style)
+   Thème : Plus Jakarta Sans · Orange / Noir / Blanc
+================================================================ */
+
+:host {
+  display: block;
+  font-family: var(--art-font-sans);
+
+  --tv-bg:        var(--art-surface);
+  --tv-surface:   var(--art-bg);
+  --tv-border:    var(--art-border);
+  --tv-accent:    var(--art-primary);
+  --tv-neutral:   var(--art-inverse-surface);
+  --tv-text:      var(--art-text);
+  --tv-text-2:    var(--art-text-muted);
+  --tv-text-3:    var(--art-text-subtle);
+  --tv-hover:     var(--art-primary-soft);
+  --tv-tab-h:     40px;          /* hauteur d'un onglet */
+  --tv-radius:    var(--art-radius-md);           /* rayon des coins arrondis du tab */
+  --tv-bar-bg:    var(--art-surface-subtle);       /* fond de la barre */
+
+  --ease: var(--art-easing-standard);
+  --dur:  var(--art-duration-base);
+
+  --shadow-xs:  var(--art-shadow-xs);
+  --shadow-sm:  var(--art-shadow-sm);
+  --shadow-pop: var(--art-shadow-popup);
+
+  --r:    var(--art-radius-lg);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   HOST
+══════════════════════════════════════════════════════════════ */
+.tv-host {
+  display: flex;
+  border: var(--art-border-width) solid var(--art-border);
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--r);
+  transition: box-shadow var(--dur) var(--ease);
+}
+
+.tv-host > :first-child {
+  border-top-left-radius:  var(--art-radius-md);   /* parent 10px - border 1px */
+  border-top-right-radius: var(--art-radius-md);
+}
+.tv-host > :last-child {
+  border-bottom-left-radius:  var(--art-radius-md);
+  border-bottom-right-radius: var(--art-radius-md);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BARRE D'ONGLETS
+══════════════════════════════════════════════════════════════ */
+.tv-bar-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--tv-surface);
+  border-bottom: 1.5px solid var(--tv-border);
+  flex-shrink: 0;
+  border-top-left-radius:  var(--art-radius-md);   /* parent 10px - border 1px */
+  border-top-right-radius: var(--art-radius-md);
+}
+
+/* Conteneur scrollable — cache la scrollbar native */
+.tv-bar {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* Padding-bottom négatif pour que le tab actif "coupe" la bordure */
+  padding-bottom: 0;
+  /* Laisser déborder vers le haut pour l'effet "tab qui dépasse" */
+  overflow: visible;
+  overflow-x: scroll;
+}
+.tv-bar::-webkit-scrollbar { display: none; }
+
+/* Ligne intérieure des tabs */
+.tv-bar-inner {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--art-space-0-5);
+  padding: 0px var(--art-space-1) 0;
+  white-space: nowrap;
+  min-width: max-content;
+}
+
+/* ── Un onglet ───────────────────────────────────────────────── */
+.tv-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--art-space-1-5);
+  height: var(--tv-tab-h);
+  padding: 0 var(--art-space-2-5);
+  border: none;
+  /*border-radius: var(--tv-radius) var(--tv-radius) 0 0;*/
+  color: var(--tv-text-3);
+  font-size: clamp(var(--art-text-sm),2vw,var(--art-text-base));
+  font-weight: var(--art-weight-medium);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+  outline: none;
+  user-select: none;
+  /* Z-index de base */
+  z-index: var(--art-z-base);
+  background: color-mix(in srgb, var(--art-white) 70%, transparent);
+}
+
+.tv-tab:hover:not(.tv-tab--disabled):not(.tv-tab--active) {
+  background: color-mix(in srgb, var(--art-white) 90%, transparent);
+  color: var(--tv-accent);
+  box-shadow:
+    0 0 0 0.5px var(--tv-border),          /* bordure globale */
+    0 1px 0 0 var(--tv-bg);
+}
+
+/* ── Onglet actif ────────────────────────────────────────────── */
+.tv-tab--active {
+  background: var(--tv-bg);
+  color: var(--tv-accent);
+  /*font-weight: var(--art-weight-bold);*/
+  /* Dessus la bordure inférieure de la barre */
+  z-index: var(--art-z-raised);
+  /* Bordure autour du tab (haut + côtés) — pas de bordure bas */
+  box-shadow:
+    0 0 0 1px var(--tv-border),          /* bordure globale */
+    0 1px 0 0 var(--tv-bg);               /* cache la bordure bottom de tv-bar-wrap */
+}
+
+/* Coins arrondis inversés sur les côtés (effet browser tab) */
+.tv-tab--active::before,
+.tv-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  background: transparent;
+  pointer-events: none;
+}
+
+/* Coin bas-gauche */
+/*.tv-tab--active::before {*/
+/*  left: -10px;*/
+/*  border-bottom-right-radius: var(--art-radius-md);*/
+/*  box-shadow: 4px 2px 0 2px var(--tv-bg), 5px 3px 0 1.5px var(--tv-border);*/
+/*}*/
+
+/*!* Coin bas-droit *!*/
+/*.tv-tab--active::after {*/
+/*  right: -10px;*/
+/*  border-bottom-left-radius: var(--art-radius-md);*/
+/*  box-shadow: -4px 2px 0 2px var(--tv-bg), -5px 3px 0 1.5px var(--tv-border);*/
+/*}*/
+
+/* ── Onglet désactivé ────────────────────────────────────────── */
+.tv-tab--disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+/* ── Icône dans le tab ───────────────────────────────────────── */
+.tv-tab-icon {
+  font-size: var(--art-text-lg);
+  opacity: .75;
+  transition: opacity var(--dur) var(--ease);
+}
+.tv-tab--active .tv-tab-icon { opacity: 1; }
+
+/* ── Label ───────────────────────────────────────────────────── */
+.tv-tab-label { letter-spacing: -.01em; }
+
+/* ── Badge numérique ─────────────────────────────────────────── */
+.tv-tab-badge {
+  min-width: 18px; height: 18px;
+  background: var(--tv-accent);
+  color: var(--art-text-inverse);
+  font-size: var(--art-text-2xs); font-weight: var(--art-weight-extrabold);
+  border-radius: var(--art-radius-full);
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 var(--art-space-1-5);
+  line-height: var(--art-leading-none);
+}
+.tv-tab:not(.tv-tab--active) .tv-tab-badge {
+  background: var(--tv-border);
+  color: var(--tv-text-2);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FLÈCHES DE DÉFILEMENT
+══════════════════════════════════════════════════════════════ */
+.tv-scroll-btn {
+  flex-shrink: 0;
+  width: 32px; height: 100%;
+  border: none; background: transparent;
+  cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tv-text-2);
+  /* Masqué par défaut */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease), color var(--dur) var(--ease);
+  position: relative; z-index: var(--art-z-sticky);
+}
+
+/* Gradient de fondu sur les côtés */
+.tv-scroll-btn--left {
+  /*background: linear-gradient(to right, var(--tv-bar-bg) 60%, transparent);*/
+}
+.tv-scroll-btn--right {
+  /*background: linear-gradient(to left, var(--tv-bar-bg) 60%, transparent);*/
+}
+
+.tv-scroll-btn--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.tv-scroll-btn:hover { color: var(--tv-accent); }
+.tv-scroll-btn .material-symbols-outlined { font-size: var(--art-text-2xl); }
+
+/* ══════════════════════════════════════════════════════════════
+   CONTENU
+══════════════════════════════════════════════════════════════ */
+.tv-content {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  /*background: var(--tv-bg);*/
+  background: var(--art-success);
+}
+
+.tv-pane {
+  display: none;
+  animation: tvFadeIn var(--art-duration-base) var(--ease) both;
+}
+
+.tv-pane--active {
+  display: block;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE MOBILE
+══════════════════════════════════════════════════════════════ */
+.tv-host--mobile .tv-tab {
+  height: 36px;
+  padding: 0 var(--art-space-3);
+  font-size: var(--art-text-sm);
+}
+
+.tv-host--mobile .tv-tab-icon { font-size: var(--art-text-md); }
+
+/* Sur mobile, barre plus compacte */
+.tv-host--mobile .tv-bar-inner {
+  padding: 0px var(--art-space-0-5) 0;
+  gap: 1px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ANIMATION
+══════════════════════════════════════════════════════════════ */
+@keyframes tvFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

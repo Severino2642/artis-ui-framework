@@ -1,0 +1,10 @@
+/* Point d'entrée : tokens + thèmes + base.
+   Dans angular.json :  "styles": ["node_modules/@artis/theme/styles/index.css"]
+   ou dans styles.css :  @import '@artis/theme/styles/index.css'; */
+@import './tokens.css';
+@import './themes/light.css';
+@import './themes/dark.css';
+@import './themes/ocean.css';
+@import './themes/forest.css';
+@import './base.css';
+@import './utilities.css';

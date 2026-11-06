@@ -1,0 +1,6 @@
+/* Styles propres à l'application de démonstration (hors framework). */
+.container-fluid { width: 100%; padding-inline: var(--art-space-4); }
+.py-3 { padding-block: var(--art-space-4); }
+.p-3 { padding: var(--art-space-4); }
+.mt-3 { margin-top: var(--art-space-4); }
+body { margin: 0; }

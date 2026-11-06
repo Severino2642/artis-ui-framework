@@ -1,0 +1,16 @@
+:host { display: block; padding: var(--art-space-6); font-family: var(--art-font-sans); color: var(--art-text); }
+h1 { margin: 0 0 var(--art-space-1); font-size: var(--art-text-3xl); font-weight: var(--art-weight-extrabold); letter-spacing: var(--art-tracking-tight); }
+.lead { margin: 0 0 var(--art-space-5); color: var(--art-text-muted); max-width: 70ch; }
+h2 { margin: var(--art-space-6) 0 var(--art-space-3); font-size: var(--art-text-xl); }
+.card { padding: var(--art-space-5); background: var(--art-surface); border: var(--art-border-width) solid var(--art-border); border-radius: var(--art-radius-xl); box-shadow: var(--art-shadow-sm); }
+.row { display: flex; flex-wrap: wrap; gap: var(--art-space-2); align-items: center; }
+.btn { padding: var(--art-space-2) var(--art-space-4); font: inherit; font-size: var(--art-text-base); font-weight: var(--art-weight-semibold); color: var(--art-text); background: var(--art-surface); border: var(--art-border-width) solid var(--art-border-strong); border-radius: var(--art-radius-md); cursor: pointer; transition: background var(--art-duration-fast) var(--art-easing-standard); }
+.btn:hover { background: var(--art-surface-subtle); }
+.btn--primary { color: var(--art-on-primary); background: var(--art-primary); border-color: var(--art-primary); }
+.btn--primary:hover { background: var(--art-primary-hover); }
+.btn--danger { color: var(--art-danger-strong); background: var(--art-danger-soft); border-color: var(--art-danger-border); }
+.btn--active { border-color: var(--art-primary); box-shadow: var(--art-shadow-focus); }
+pre { margin: var(--art-space-3) 0 0; padding: var(--art-space-3); max-height: 260px; overflow: auto; font-family: var(--art-font-mono); font-size: var(--art-text-sm); background: var(--art-surface-subtle); border-radius: var(--art-radius-md); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--art-space-2); }
+.sw { padding: var(--art-space-2); font-family: var(--art-font-mono); font-size: var(--art-text-2xs); border: var(--art-border-width) solid var(--art-border); border-radius: var(--art-radius-md); background: var(--art-surface); }
+.sw i { display: block; height: var(--art-space-8); margin-bottom: var(--art-space-1); border-radius: var(--art-radius-sm); border: var(--art-border-width) solid var(--art-border); }

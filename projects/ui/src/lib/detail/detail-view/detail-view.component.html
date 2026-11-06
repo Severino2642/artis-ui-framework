@@ -1,0 +1,13 @@
+<!-- ================================================================
+     DETAIL-VIEW — Orchestrator: renders multiple detail cards
+================================================================ -->
+<div class="dv-wrapper" *ngIf="config">
+  <ng-container *ngFor="let card of config.cards">
+    <art-detail-card
+      [config]="card"
+      [data]="data"
+      [isMobile]="isMobile"
+      (buttonClick)="onCardButtonClick($event)"
+    ></art-detail-card>
+  </ng-container>
+</div>

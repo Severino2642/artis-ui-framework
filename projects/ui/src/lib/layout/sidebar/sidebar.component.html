@@ -1,0 +1,283 @@
+<!-- Mobile backdrop -->
+<div
+  class="sidebar-overlay"
+  [class.active]="mobileOpen && isMobile"
+  (click)="toggleMobileOpen()"
+></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SIDEBAR ROOT  — position: fixed, overflow: visible
+     Popup portals are direct children of this element so they
+     are NEVER clipped by the nav's overflow-y: auto.
+═══════════════════════════════════════════════════════════════ -->
+<aside
+  class="sidebar"
+  [class.sidebar--collapsed]="sidebarCollapsed && !isMobile"
+  [class.sidebar--mobile-open]="mobileOpen && isMobile"
+  [class.sidebar--resizing]="isResizing"
+>
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <div class="brand-icon" *ngIf="logoUrl">
+        <img [src]="logoUrl" alt="" class="brand-logo"/>
+      </div>
+      <span class="brand-name" *ngIf="brandName && (!sidebarCollapsed || isMobile)">{{ brandName }}</span>
+    </div>
+    <button
+      class="sidebar-toggle-btn"
+      *ngIf="!isMobile"
+      (click)="toggleDesktopCollapse()"
+      [title]="sidebarCollapsed ? 'Développer' : 'Réduire'"
+    >
+      <span class="material-symbols-outlined">
+        {{ sidebarCollapsed ? 'chevron_right' : 'chevron_left' }}
+      </span>
+    </button>
+  </div>
+
+  <ng-container *ngIf="alternatePanel">
+    <ng-content select="[artSidebarPanel]"></ng-content>
+  </ng-container>
+
+  <ng-container *ngIf="!alternatePanel">
+    <!-- ── Search ──────────────────────────────────────────────── -->
+    <div class="search-wrapper" *ngIf="!sidebarCollapsed || isMobile">
+      <div class="search-field">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchInput()"
+          placeholder="Rechercher..."
+          autocomplete="off"
+        />
+        <kbd class="search-kbd">⌘K</kbd>
+      </div>
+
+      <!-- Autocomplete results -->
+      <div class="search-results" *ngIf="showSearchResults">
+        <div
+          class="search-result-item"
+          *ngFor="let result of searchResults"
+          (mousedown)="selectSearchResult(result)"
+        >
+          <div class="search-result-icon">
+            <span class="material-symbols-outlined">{{ result.icon }}</span>
+          </div>
+          <div class="search-result-body">
+            <span class="search-result-name">{{ result.nom }}</span>
+            <span class="search-result-path" *ngIf="getItemBreadcrumb(result)">
+            {{ getItemBreadcrumb(result) }}
+          </span>
+          </div>
+          <span class="material-symbols-outlined search-result-arrow">chevron_right</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Navigation (scrollable — contains ONLY levels 1–3) ─── -->
+    <nav class="sidebar-nav">
+
+      <!-- EXPANDED MODE -->
+      <ng-container *ngIf="!sidebarCollapsed || isMobile">
+        <ng-container
+          *ngTemplateOutlet="navTree; context: { $implicit: level1Items, depth: 1 }"
+        ></ng-container>
+      </ng-container>
+
+      <!-- COLLAPSED / ICON-ONLY MODE -->
+      <ng-container *ngIf="sidebarCollapsed && !isMobile">
+        <div class="collapsed-nav">
+          <div
+            class="collapsed-item"
+            *ngFor="let item of level1Items"
+            [class.collapsed-item--active]="isItemActive(item)"
+            [class.collapsed-item--popup-open]="isFlyoutOpenFor(item.id || '')"
+            (mouseenter)="onCollapsedItemEnter(item, $event)"
+            (mouseleave)="onCollapsedItemLeave()"
+            (click)="!hasChildren(item) && onNavItemClick(item)"
+          >
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
+            <span
+              class="collapsed-badge"
+              *ngIf="item.badge_value"
+              [style.background-color]="item.badge_color || 'var(--c-accent)'"
+            >{{ item.badge_value }}</span>
+          </div>
+        </div>
+      </ng-container>
+
+    </nav>
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PORTAILS — enfants directs de .sidebar (position:fixed)
+       HORS .sidebar-nav, donc jamais coupés par overflow-y:auto.
+  ════════════════════════════════════════════════════════════════ -->
+
+  <!-- Flyout du mode replié (niveau 1, sidebar collapsed) -->
+  <div
+    class="icon-flyout icon-flyout--portal"
+    *ngIf="hoveredFlyout && sidebarCollapsed && !isMobile"
+    [style.top.px]="hoveredFlyout.top"
+    [style.left.px]="hoveredFlyout.left"
+    (mouseenter)="onFlyoutEnter()"
+    (mouseleave)="onFlyoutLeave()"
+  >
+    <div class="flyout-header">
+      <span class="material-symbols-outlined">{{ hoveredFlyout.item.icon }}</span>
+      {{ hoveredFlyout.item.nom }}
+    </div>
+    <ng-container *ngIf="hasChildren(hoveredFlyout.item)">
+      <ng-container
+        *ngTemplateOutlet="navTree; context: { $implicit: getChildren(hoveredFlyout.item), depth: 2 }"
+      ></ng-container>
+    </ng-container>
+    <div
+      class="flyout-direct-link"
+      *ngIf="!hasChildren(hoveredFlyout.item)"
+      (click)="onNavItemClick(hoveredFlyout.item)"
+    >
+      <span class="material-symbols-outlined">arrow_forward</span>
+      Ouvrir {{ hoveredFlyout.item.nom }}
+    </div>
+  </div>
+
+  <!-- Popups niveau ≥ 3 (clic) -->
+  <div
+    class="popup-portal"
+    *ngFor="let popup of openPopups"
+    [style.top.px]="isMobile ? popup.top+41 : popup.top"
+    [style.left.px]="isMobile? 50 : popup.left"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="popup-portal-title">
+      <span class="material-symbols-outlined">{{ popup.item.icon }}</span>
+      {{ popup.item.nom }}
+    </div>
+    <ng-container
+      *ngTemplateOutlet="navTree; context: { $implicit: getChildren(popup.item), depth: popup.item.niveau + 1 }"
+    ></ng-container>
+  </div>
+
+  <!-- ── Footer ──────────────────────────────────────────────── -->
+  <div class="sidebar-footer user-footer-area">
+
+    <!-- User dropdown (slides up) -->
+    <div class="user-dropdown" *ngIf="userMenuOpen && (!sidebarCollapsed || isMobile)">
+      <button class="user-dropdown-item" (click)="onButtonClick('profile')">
+        <span class="material-symbols-outlined">person_outline</span>
+        <span>Profil</span>
+      </button>
+      <button class="user-dropdown-item" (click)="onButtonClick('settings')">
+        <span class="material-symbols-outlined">settings</span>
+        <span>Paramètres</span>
+      </button>
+      <div class="user-dropdown-sep"></div>
+      <button class="user-dropdown-item user-dropdown-item--danger" (click)="onButtonClick('logout')">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Se déconnecter</span>
+      </button>
+    </div>
+
+    <div
+      class="user-card border"
+      (click)="toggleUserMenu()"
+      [class.user-card--open]="userMenuOpen"
+    >
+      <div class="user-avatar">{{ getUserInitials() }}</div>
+      <div class="user-info" *ngIf="!sidebarCollapsed || isMobile">
+        <span class="user-name">{{ user.name }}</span>
+        <span class="user-email">{{ user.email }}</span>
+      </div>
+      <span
+        class="material-symbols-outlined user-chevron"
+        *ngIf="!sidebarCollapsed || isMobile"
+      >{{ userMenuOpen ? 'expand_less' : 'expand_more' }}</span>
+    </div>
+
+  </div>
+
+  <!-- Glisser le bord droit pour redimensionner (desktop, déplié uniquement) -->
+  <div
+    class="sidebar-resize-handle"
+    *ngIf="!isMobile && !sidebarCollapsed"
+    [class.sidebar-resize-handle--active]="isResizing"
+    (mousedown)="onResizeStart($event)"
+    title="Glisser pour redimensionner"
+  ></div>
+</aside>
+
+<!-- Mobile FAB (left center) -->
+<button
+  class="mobile-fab"
+  (click)="toggleMobileOpen()"
+  *ngIf="isMobile"
+  [class.mobile-fab--open]="mobileOpen"
+  aria-label="Menu"
+>
+  <span class="material-symbols-outlined">{{ mobileOpen ? 'close' : 'menu' }}</span>
+</button>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAV TREE — Recursive template
+     depth 1-2 : accordion inline
+     depth = 3 : inline BUT click with children → openPopupPortal()
+     depth ≥ 4 : rendered only inside portal popups
+═══════════════════════════════════════════════════════════════ -->
+<ng-template #navTree let-items let-depth="depth">
+  <ul class="nav-list" [attr.data-depth]="depth" [style.margin-left.px]="depth === 1 || depth === 4 ? 0 : (depth === 2 ? 21 : (depth<4 ? 21 : 13))">
+    <li class="nav-list-item" *ngFor="let item of items">
+
+      <!-- ── Item row ──────────────────────────────────────── -->
+      <div
+        class="nav-item"
+        [class.nav-item--active]="isItemActive(item)"
+        [class.nav-item--expanded]="hasChildren(item) && isExpanded(item.id || item.nom)"
+        [class.nav-item--popup-trigger]="depth >= 3 && hasChildren(item)"
+        [class.nav-item--popup-open]="isPopupOpen(item.id || '')"
+        [style.padding-left.px]="depth < 4 ? (depth === 1 ? 12 : 12) : 6"
+
+        (click)="depth === 3 ? openPopupPortal(item, $event) : onNavItemClick(item)"
+        [title]="item.nom"
+      >
+        <span class="nav-active-bar" *ngIf="isItemActive(item)"></span>
+
+        <span class="material-symbols-outlined nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.nom }}</span>
+
+        <span
+          class="nav-badge"
+          *ngIf="item.badge_value"
+          [style.background-color]="item.badge_color || 'var(--c-accent)'"
+        >{{ item.badge_value }}</span>
+
+        <span
+          class="material-symbols-outlined nav-chevron"
+          *ngIf="hasChildren(item)"
+        >
+          {{
+            depth === 3
+              ? (isPopupOpen(item.id || '') ? 'chevron_right' : 'chevron_right')
+              : (isExpanded(item.id || item.nom) ? 'expand_less' : 'chevron_right')
+          }}
+        </span>
+      </div>
+
+      <!-- ── Inline children (depth 1 and 2 only) ─────────── -->
+      <div
+        class="nav-children"
+        *ngIf="hasChildren(item) && isExpanded(item.id || item.nom) && depth != 3"
+      >
+        <ng-container
+          *ngTemplateOutlet="navTree; context: { $implicit: getChildren(item), depth: depth + 1 }"
+        ></ng-container>
+      </div>
+
+    </li>
+  </ul>
+</ng-template>

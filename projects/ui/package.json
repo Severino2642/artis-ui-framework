@@ -1,0 +1,20 @@
+{
+  "name": "@artis/ui",
+  "version": "1.1.0",
+  "description": "Bibliothèque de composants Angular Artis : formulaires, listes, détails, layout, modales — 100 % pilotée par les tokens @artis/theme.",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@artis/api": "^1.1.0",
+    "@artis/theme": "^1.1.0",
+    "@artis/toaster": "^1.1.0",
+    "rxjs": "^7.8.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

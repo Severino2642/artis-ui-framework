@@ -1,0 +1,297 @@
+<!-- ================================================================
+     FORM-CHILD — Table / Card detail rows
+================================================================ -->
+<div class="fc-wrapper">
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <div class="fc-header">
+    <div class="fc-header-left">
+      <div class="fc-icon-wrap" *ngIf="config.icon">
+        <span class="material-symbols-outlined">{{ config.icon }}</span>
+      </div>
+      <div>
+        <h3 class="fc-title"><art-label [text]="config.title" [explanation]="config.explanation" [trigger]="config.explanationTrigger ?? 'click'" /></h3>
+        <p class="fc-subtitle" *ngIf="config.subtitle || rows.length > 0">
+          <ng-container *ngIf="config.subtitle">{{ config.subtitle }}</ng-container>
+            <input
+              *ngIf="viewMode==='card'"
+              style="width: 12px"
+              type="checkbox"
+              class="fc-checkbox"
+              [checked]="allSelected"
+              (change)="toggleSelectAll($any($event.target).checked)"
+            />
+          <ng-container *ngIf="rows.length > 0">
+            {{ rows.length }} ligne{{ rows.length > 1 ? 's' : '' }}
+            <ng-container *ngIf="selectedRows.size > 0">
+              · {{ selectedRows.size }} sélectionnée{{ selectedRows.size > 1 ? 's' : '' }}
+            </ng-container>
+          </ng-container>
+        </p>
+      </div>
+    </div>
+
+    <div class="fc-header-right">
+      <!-- Extra custom buttons -->
+      <button
+        type="button"
+        class="fc-btn fc-btn--outline"
+        *ngFor="let btn of config.extraButtons"
+        (click)="onExtraBtn(btn)"
+        [class]="'fc-btn ' + (btn.cssClass || 'fc-btn--outline')"
+      >
+        <span class="material-symbols-outlined" *ngIf="btn.icon">{{ btn.icon }}</span>
+        {{ btn.label }}
+      </button>
+
+      <!-- Supprimer la sélection (même bouton en pied de tableau) -->
+      <ng-container *ngTemplateOutlet="deleteBtn"></ng-container>
+
+      <!-- Toggle view (table ↔ card) -->
+      <button
+        *ngIf="!isMobile"
+        type="button"
+        class="fc-btn fc-btn--icon"
+        (click)="toggleView()"
+        [title]="viewMode === 'table' ? 'Vue carte' : 'Vue tableau'"
+      >
+        <span class="material-symbols-outlined">
+          {{ viewMode === 'table' ? 'view_agenda' : 'table_rows' }}
+        </span>
+      </button>
+
+      <!-- Ajouter N lignes / une ligne (mêmes boutons en pied de tableau) -->
+      <ng-container *ngTemplateOutlet="addBtns"></ng-container>
+    </div>
+  </div>
+  <!-- /fc-header -->
+
+  <!-- Boutons partagés en-tête ↔ pied : une seule définition = comportement identique des deux côtés -->
+  <ng-template #deleteBtn>
+    <button type="button" class="fc-btn fc-btn--danger" *ngIf="selectedRows.size > 0" (click)="removeSelected()">
+      <span class="material-symbols-outlined" aria-hidden="true">delete_outline</span>
+      Supprimer ({{ selectedRows.size }})
+    </button>
+  </ng-template>
+  <ng-template #addBtns>
+    <button type="button" class="fc-btn fc-btn--outline" *ngIf="bulkCount > 0" [disabled]="bulkAddable === 0" (click)="addRows(bulkCount)"
+            [attr.aria-label]="'Ajouter ' + bulkCount + ' lignes'">
+      <span class="material-symbols-outlined" aria-hidden="true">playlist_add</span>
+      Ajouter {{ bulkCount }} lignes
+    </button>
+    <button type="button" class="fc-btn fc-btn--primary" [disabled]="!canAdd" (click)="addRow()">
+      <span class="material-symbols-outlined" aria-hidden="true">add</span>
+      Ajouter une ligne
+    </button>
+  </ng-template>
+
+  <!-- ════════════════════════════════════════════════════════
+       TABLE VIEW
+  ═════════════════════════════════════════════════════════ -->
+  <div class="fc-table-container" *ngIf="viewMode === 'table'">
+    <table class="fc-table">
+      <thead>
+      <tr>
+        <!-- Select all -->
+        <th class="fc-th fc-th--check">
+          <input
+            type="checkbox"
+            class="fc-checkbox"
+            [checked]="allSelected"
+            (change)="toggleSelectAll($any($event.target).checked)"
+          />
+        </th>
+        <th class="fc-th fc-th--num">#</th>
+        <!-- Field columns -->
+        <th class="fc-th" *ngFor="let f of visibleFields">
+          <art-label [text]="f.label ?? f.name" [explanation]="f.explanation" [trigger]="f.explanationTrigger ?? 'click'" />
+          <span class="fc-th-required" *ngIf="f.required" aria-hidden="true">*</span>
+        </th>
+        <th class="fc-th fc-th--actions">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- Empty state -->
+      <tr *ngIf="rows.length === 0">
+        <td [colSpan]="visibleFields.length + 3" class="fc-empty-cell">
+          <div class="fc-empty">
+            <span class="material-symbols-outlined">table_rows</span>
+            <p>Aucune ligne. Cliquez sur <strong>Ajouter une ligne</strong>.</p>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Data rows -->
+      <tr
+        *ngFor="let row of rows; let i = index"
+        class="fc-tr"
+        [class.fc-tr--selected]="selectedRows.has(i)"
+      >
+        <!-- Checkbox -->
+        <td class="fc-td fc-td--check">
+          <input
+            type="checkbox"
+            class="fc-checkbox"
+            [checked]="selectedRows.has(i)"
+            (change)="toggleRowSelection(i)"
+          />
+        </td>
+
+        <!-- Index -->
+        <td class="fc-td fc-td--num">{{ i + 1 }}</td>
+
+        <!-- Fields -->
+        <td class="fc-td" *ngFor="let f of visibleFields">
+          <art-form-field
+            [config]="f"
+            [value]="row[f.name]"
+            (valueChange)="onFieldChange(i, f.name, $event)"
+            [compact]="true"
+            [formValues]="row"
+            (buttonClick)="onFieldBtn($event, i)"
+          ></art-form-field>
+        </td>
+
+        <!-- Delete action -->
+        <td class="fc-td fc-td--actions">
+          <button
+            type="button"
+            class="fc-row-delete-btn"
+            (click)="removeRow(i)"
+            title="Supprimer cette ligne"
+          >
+            <span class="material-symbols-outlined">delete_outline</span>
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- /table view -->
+
+  <!-- ════════════════════════════════════════════════════════
+       CARD VIEW (mobile-friendly)
+  ═════════════════════════════════════════════════════════ -->
+  <div class="fc-cards" *ngIf="viewMode === 'card'">
+
+    <!-- Empty state -->
+    <div class="fc-empty" *ngIf="rows.length === 0">
+      <span class="material-symbols-outlined">view_agenda</span>
+      <p>Aucune ligne. Cliquez sur <strong>Ajouter une ligne</strong>.</p>
+    </div>
+
+    <!-- Card per row -->
+    <div
+      class="fc-card"
+      *ngFor="let row of rows; let i = index"
+      [class.fc-card--selected]="selectedRows.has(i)"
+    >
+      <!-- Card header -->
+      <div class="fc-card-header" (click)="toggleCard(i)">
+        <div class="fc-card-header-left">
+          <input
+            type="checkbox"
+            class="fc-checkbox"
+            [checked]="selectedRows.has(i)"
+            (change)="toggleRowSelection(i); $event.stopPropagation()"
+            (click)="$event.stopPropagation()"
+          />
+          <div class="fc-card-num">{{ i + 1 }}</div>
+          <span class="fc-card-title">{{ getCardTitle(row, i) }}</span>
+        </div>
+        <div class="fc-card-header-right">
+          <button
+            type="button"
+            class="fc-row-delete-btn"
+            (click)="removeRow(i); $event.stopPropagation()"
+            title="Supprimer"
+          >
+            <span class="material-symbols-outlined">delete_outline</span>
+          </button>
+          <span class="material-symbols-outlined fc-card-chevron">
+            {{ isCardExpanded(i) ? 'expand_less' : 'expand_more' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Card body (expandable) -->
+      <div class="fc-card-body" *ngIf="isCardExpanded(i)">
+        <div class="row g-3">
+          <div
+            class="col-12 col-sm-6 col-md-{{ f.colSpan ?? 6 }}"
+            *ngFor="let f of visibleFields"
+          >
+<!--            <label class="fc-card-field-label">-->
+<!--              {{ f.label ?? f.name }} 454-->
+<!--              <span class="fc-th-required" *ngIf="f.required">*</span>-->
+<!--            </label>-->
+            <art-form-field
+              [config]="f"
+              [value]="row[f.name]"
+              (valueChange)="onFieldChange(i, f.name, $event)"
+              [compact]="false"
+              [formValues]="row"
+              (buttonClick)="onFieldBtn($event, i)"
+            ></art-form-field>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /card -->
+
+  </div>
+  <!-- /card view -->
+
+  <!-- ════════════════════════════════════════════════════════
+       PIED DE TABLEAU — actions de lignes, PARALLÈLES à l'en-tête :
+       Supprimer la sélection · Ajouter N lignes · Ajouter une ligne
+  ═════════════════════════════════════════════════════════ -->
+  <div class="fc-rows-footer" *ngIf="rows.length > 0">
+    <span class="fc-rows-footer-info" *ngIf="config.maxRows !== undefined">{{ rows.length }} / {{ config.maxRows }}</span>
+    <div class="fc-rows-footer-actions">
+      <ng-container *ngTemplateOutlet="deleteBtn"></ng-container>
+      <ng-container *ngTemplateOutlet="addBtns"></ng-container>
+    </div>
+  </div>
+  <!-- /rows footer -->
+
+  <!-- ════════════════════════════════════════════════════════
+       FOOTER ACTIONS — visible uniquement si footerConfig fourni
+       (formulaire mère absent — les boutons migrent ici)
+  ═════════════════════════════════════════════════════════ -->
+  <div class="fc-footer" *ngIf="footerConfig" [class.fc-footer--mobile]="footerConfig.isMobile">
+    <div class="fc-footer-left">
+      <button
+        type="button"
+        *ngFor="let btn of footerConfig.extraButtons"
+        [class]="getFooterBtnClass(btn)"
+        (click)="onFooterBtn(btn.id)"
+      >
+        <span class="material-symbols-outlined" *ngIf="btn.icon">{{ btn.icon }}</span>
+        {{ btn.label }}
+      </button>
+    </div>
+    <div class="fc-footer-right">
+      <button
+        *ngIf="footerConfig.showReset !== false"
+        type="button"
+        class="fc-btn fc-btn--outline"
+        (click)="onFooterBtn('reset')"
+      >
+        <span class="material-symbols-outlined">close</span>
+        Réinitialiser
+      </button>
+      <button
+        *ngIf="footerConfig.showSave !== false"
+        type="button"
+        class="fc-btn fc-btn--primary"
+        (click)="onFooterBtn('save')"
+      >
+        <span class="material-symbols-outlined">check</span>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+  <!-- /footer actions -->
+
+</div>

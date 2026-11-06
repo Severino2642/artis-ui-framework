@@ -1,0 +1,98 @@
+<!-- ================================================================
+     FORM-BUILDER — Parent form + optional child form
+================================================================ -->
+<div class="fb-wrapper" *ngIf="hasParentForm || childConfig">
+
+  <!-- ════════════════════════════════════════════════════════
+       PARENT FORM SECTIONS — uniquement si config fourni
+  ═════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="hasParentForm">
+
+    <div
+      class="fb-section"
+      *ngFor="let section of config!.sections; let si = index"
+    >
+      <!-- Section header -->
+      <div class="fb-section-header" (click)="toggleSection(si)">
+        <div class="fb-section-header-left">
+          <div class="fb-section-icon" *ngIf="section.icon">
+            <span class="material-symbols-outlined">{{ section.icon }}</span>
+          </div>
+          <div>
+            <h2 class="fb-section-title"><art-label [text]="section.title" [explanation]="section.explanation" [trigger]="section.explanationTrigger ?? 'click'" /></h2>
+            <p class="fb-section-subtitle" *ngIf="section.subtitle">{{ section.subtitle }}</p>
+          </div>
+        </div>
+        <button type="button" class="fb-section-toggle" [attr.aria-expanded]="!isSectionCollapsed(si)" [attr.aria-label]="section.title">
+          <span class="material-symbols-outlined fb-section-chevron" aria-hidden="true">
+            {{ isSectionCollapsed(si) ? 'expand_more' : 'expand_less' }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Section fields -->
+      <div class="fb-section-body" *ngIf="!isSectionCollapsed(si)">
+        <div class="row g-3">
+          <div
+            *ngFor="let field of getVisibleFields(section.fields)"
+            [class]="getColClass(field)"
+          >
+            <art-form-field
+              [config]="field"
+              [value]="parentValues[field.name]"
+              (valueChange)="onFieldChange(field.name, $event)"
+              [compact]="false"
+              [formValues]="parentValues"
+              (buttonClick)="onFieldButtonClick($event)"
+            ></art-form-field>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /sections -->
+
+    <!-- ════════════════════════════════════════════════════════
+         ACTION BUTTONS — standalone (formulaire mère présent)
+    ═════════════════════════════════════════════════════════ -->
+    <div class="fb-actions" [class.fb-actions--mobile]="isMobile">
+      <div class="fb-actions-left">
+        <button
+          type="button"
+          *ngFor="let btn of config!.extraButtons"
+          [class]="getExtraButtonClass(btn)"
+          (click)="onExtraButtonClick(btn)"
+        >
+          <span class="material-symbols-outlined" *ngIf="btn.icon">{{ btn.icon }}</span>
+          {{ btn.label }}
+        </button>
+      </div>
+      <div class="fb-actions-right">
+        <button type="button" class="fb-action-btn fb-action-btn--reset" (click)="onReset()">
+          <span class="material-symbols-outlined">close</span>
+          Réinitialiser
+        </button>
+        <button type="button" class="fb-action-btn fb-action-btn--save" (click)="onSave()">
+          <span class="material-symbols-outlined">check</span>
+          {{ isEditMode ? 'Modifier' : 'Enregistrer' }}
+        </button>
+      </div>
+    </div>
+    <!-- /actions standalone -->
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════════════
+       CHILD FORM — les boutons d'action migrent en footer
+       quand le formulaire mère est absent (footerConfig)
+  ═════════════════════════════════════════════════════════ -->
+  <art-form-child
+    *ngIf="childConfig"
+    [config]="childConfig!"
+    [rows]="childRows"
+    (rowsChange)="onChildRowsChange($event)"
+    (fieldButtonClick)="onChildFieldButtonClick($event)"
+    [footerConfig]="childFooterConfig"
+    (footerAction)="onChildFooterAction($event)"
+  ></art-form-child>
+
+</div>

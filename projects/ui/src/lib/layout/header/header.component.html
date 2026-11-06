@@ -1,0 +1,341 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     HEADER COMPONENT
+     Bootstrap grid + custom CSS variables (cohérence sidebar)
+═══════════════════════════════════════════════════════════════ -->
+<header
+  class="art-header"
+>
+  <!--  [style.margin-left.px]="headerMarginLeft"-->
+
+  <div class="header-inner d-flex align-items-center gap-3">
+
+    <!-- ── LEFT : Titre + Breadcrumbs ─────────────────────────── -->
+    <div class="header-left d-flex flex-column justify-content-center min-w-0 flex-grow-1">
+
+      <!-- ══ MODE MOBILE : titre = bouton dropdown breadcrumbs ══ -->
+      <ng-container *ngIf="isMobile; else desktopLeft">
+        <div class="title-breadcrumb-wrapper position-relative">
+          <button
+            class="title-dropdown-btn"
+            [class.title-dropdown-btn--active]="showTitleDropdown"
+            (click)="toggleTitleDropdown($event)"
+            aria-haspopup="true"
+            [attr.aria-expanded]="showTitleDropdown"
+          >
+            <!-- Texte défilant si trop long -->
+            <span class="title-scroll-track" #mobileTrack>
+              <span
+                class="title-marquee-runner"
+                [class.title-marquee-runner--animate]="isTitleOverflowing"
+              >
+                <span class="title-marquee-text" #mobileText>{{ pageTitle }}</span>
+                <span class="title-marquee-gap" *ngIf="isTitleOverflowing">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span class="title-marquee-text" *ngIf="isTitleOverflowing">{{ pageTitle }}</span>
+              </span>
+            </span>
+            <span class="material-symbols-outlined title-chevron">
+              {{ showTitleDropdown ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+
+          <!-- Dropdown des breadcrumbs complets -->
+          <div
+            class="dropdown-panel title-bc-panel"
+            *ngIf="showTitleDropdown"
+            (click)="$event.stopPropagation()"
+          >
+            <ol class="title-bc-list">
+              <ng-container *ngFor="let crumb of breadcrumbs; let last = last">
+                <li
+                  class="title-bc-item"
+                  [class.title-bc-item--current]="last"
+                  (click)="onBreadcrumbClick(crumb); showTitleDropdown = false"
+                >
+                  <span class="material-symbols-outlined title-bc-icon">{{ crumb.icon ? crumb.icon : 'subdirectory_arrow_right' }}</span>
+                  {{ crumb.label }}
+                </li>
+              </ng-container>
+            </ol>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ══ MODE DESKTOP : titre + breadcrumbs normaux ══════════ -->
+      <ng-template #desktopLeft>
+        <!-- Titre avec défilement si trop long -->
+        <div class="page-title-wrapper" #desktopTrack>
+          <span
+            class="page-title-marquee-runner"
+            [class.page-title-marquee-runner--animate]="isTitleOverflowing"
+          >
+            <span class="page-title-marquee-text" #desktopText>{{ pageTitle }}</span>
+            <span class="page-title-marquee-gap" *ngIf="isTitleOverflowing">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span class="page-title-marquee-text" *ngIf="isTitleOverflowing">{{ pageTitle }}</span>
+          </span>
+        </div>
+
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumb-nav" aria-label="breadcrumb" *ngIf="visibleCrumbs.length > 1">
+          <ol class="breadcrumb-list mb-0">
+
+            <!-- Première miette -->
+            <li class="bc-item">
+              <span
+                class="bc-label"
+                [class.bc-link]="visibleCrumbs[0].route"
+                (click)="onBreadcrumbClick(visibleCrumbs[0])"
+              >
+                <span
+                  class="material-symbols-outlined bc-icon"
+                  *ngIf="visibleCrumbs[0].icon"
+                >{{ visibleCrumbs[0].icon }}</span>
+                {{ visibleCrumbs[0].label }}
+              </span>
+            </li>
+
+            <!-- Ellipsis (miettes cachées) -->
+            <ng-container *ngIf="hiddenCrumbs.length > 0">
+              <li class="bc-sep"><span class="material-symbols-outlined">chevron_right</span></li>
+              <li class="bc-item bc-ellipsis" (click)="showHiddenCrumbs = !showHiddenCrumbs">
+                <span class="bc-label bc-link">…</span>
+
+                <!-- Tooltip des miettes cachées -->
+                <div class="bc-hidden-tooltip" *ngIf="showHiddenCrumbs">
+                  <div
+                    class="bc-tooltip-item"
+                    *ngFor="let h of hiddenCrumbs"
+                    (click)="onBreadcrumbClick(h); showHiddenCrumbs = false"
+                  >
+                    <span class="material-symbols-outlined" *ngIf="h.icon">{{ h.icon }}</span>
+                    {{ h.label }}
+                  </div>
+                </div>
+              </li>
+            </ng-container>
+
+            <!-- Miettes intermédiaires (cas ≤ MAX) -->
+            <ng-container *ngIf="hiddenCrumbs.length === 0">
+              <ng-container *ngFor="let crumb of visibleCrumbs.slice(1, -1)">
+                <li class="bc-sep"><span class="material-symbols-outlined">chevron_right</span></li>
+                <li class="bc-item">
+                  <span
+                    class="bc-label"
+                    [class.bc-link]="crumb.route"
+                    (click)="onBreadcrumbClick(crumb)"
+                  >{{ crumb.label }}</span>
+                </li>
+              </ng-container>
+            </ng-container>
+
+            <!-- Avant-dernière + dernière (après ellipsis) -->
+            <ng-container *ngIf="hiddenCrumbs.length > 0">
+              <ng-container *ngFor="let crumb of visibleCrumbs.slice(1)">
+                <li class="bc-sep"><span class="material-symbols-outlined">chevron_right</span></li>
+                <li class="bc-item">
+                  <span
+                    class="bc-label"
+                    [class.bc-link]="crumb.route"
+                    [class.bc-current]="!crumb.route"
+                    (click)="onBreadcrumbClick(crumb)"
+                  >{{ crumb.label }}</span>
+                </li>
+              </ng-container>
+            </ng-container>
+
+            <!-- Dernière miette (cas ≤ MAX sans ellipsis) -->
+            <ng-container *ngIf="hiddenCrumbs.length === 0 && visibleCrumbs.length > 1">
+              <li class="bc-sep"><span class="material-symbols-outlined">chevron_right</span></li>
+              <li class="bc-item">
+                <span class="bc-label bc-current">{{ visibleCrumbs[visibleCrumbs.length - 1].label }}</span>
+              </li>
+            </ng-container>
+
+          </ol>
+        </nav>
+      </ng-template>
+
+    </div>
+
+    <!-- ── RIGHT : Search + Actions ───────────────────────────── -->
+    <div class="header-right d-flex align-items-center gap-2 flex-shrink-0">
+
+      <!-- Search -->
+      <div class="search-box d-flex align-items-center" *ngIf="!isMobile">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          class="search-input"
+          [placeholder]="searchPlaceholder"
+          [value]="searchValue"
+          (input)="onSearchInput($any($event.target).value)"
+          (keydown)="onSearchKeydown($event)"
+          autocomplete="off"
+        />
+        <kbd class="search-kbd d-none d-md-inline-flex">⌘K</kbd>
+      </div>
+
+      <!-- Help -->
+      <button
+        class="icon-btn"
+        title="Aide"
+        (click)="helpClick.emit()"
+        aria-label="Aide"
+      >
+        <span class="material-symbols-outlined">help_outline</span>
+      </button>
+
+      <!-- ── Notifications ──────────────────────────────────── -->
+      <div class="notif-wrapper position-relative">
+        <button
+          class="icon-btn"
+          [class.icon-btn--active]="showNotifDropdown"
+          title="Notifications"
+          (click)="toggleNotif($event)"
+          aria-label="Notifications"
+        >
+          <span class="material-symbols-outlined">notifications_none</span>
+          <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCountDisplay }}</span>
+        </button>
+
+        <!-- Notification Dropdown -->
+        <div
+          class="dropdown-panel notif-panel"
+          *ngIf="showNotifDropdown"
+          (click)="$event.stopPropagation()"
+        >
+          <!-- Panel header -->
+          <div class="panel-header d-flex align-items-center justify-content-between">
+            <div>
+              <h2 class="panel-title mb-0">Notification Center</h2>
+              <span class="panel-subtitle" *ngIf="unreadCount > 0">
+                {{ unreadCount }} non lue{{ unreadCount > 1 ? 's' : '' }}
+              </span>
+            </div>
+            <button class="see-all-btn" (click)="markAllRead()">Tout lire</button>
+          </div>
+
+          <!-- Tabs -->
+          <div class="notif-tabs">
+            <button
+              class="notif-tab"
+              [class.notif-tab--active]="notifTab === 'today'"
+              (click)="setNotifTab('today')"
+            >Aujourd'hui</button>
+            <button
+              class="notif-tab"
+              [class.notif-tab--active]="notifTab === 'week'"
+              (click)="setNotifTab('week')"
+            >Cette semaine</button>
+            <button
+              class="notif-tab"
+              [class.notif-tab--active]="notifTab === 'earlier'"
+              (click)="setNotifTab('earlier')"
+            >Plus tôt</button>
+          </div>
+
+          <!-- Notification list -->
+          <div class="notif-list">
+            <ng-container *ngIf="notifsByTab.length > 0; else emptyNotif">
+              <div
+                class="notif-item"
+                *ngFor="let notif of notifsByTab"
+                [class.notif-item--unread]="!notif.isRead"
+                (click)="markRead(notif, $event)"
+              >
+                <div class="notif-icon-wrap">
+                  <span class="material-symbols-outlined">{{ notif.icon }}</span>
+                </div>
+                <div class="notif-body flex-grow-1 min-w-0">
+                  <div class="d-flex align-items-start justify-content-between gap-2">
+                    <p class="notif-title mb-0">
+                      <span
+                        class="notif-dot"
+                        [style.background-color]="getSeverityColor(notif.severity)"
+                        *ngIf="!notif.isRead"
+                      ></span>
+                      {{ notif.title }}
+                    </p>
+                    <span class="notif-time flex-shrink-0">{{ notif.time }}</span>
+                  </div>
+                  <p class="notif-message mb-0" [innerHTML]="notif.message"></p>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-template #emptyNotif>
+              <div class="notif-empty">
+                <span class="material-symbols-outlined">notifications_off</span>
+                <p>Aucune notification</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Profile (mobile only) ─────────────────────────── -->
+      <div class="profile-wrapper position-relative" *ngIf="isMobile">
+        <button
+          class="profile-btn d-flex align-items-center gap-2"
+          [class.profile-btn--active]="showProfileDropdown"
+          (click)="toggleProfile($event)"
+          aria-label="Profil"
+        >
+          <!-- Avatar -->
+          <div class="header-avatar">
+            <img
+              *ngIf="user.avatarUrl"
+              [src]="user.avatarUrl"
+              [alt]="user.name"
+              class="avatar-img"
+            />
+            <span *ngIf="!user.avatarUrl" class="avatar-initials">{{ getUserInitials() }}</span>
+          </div>
+          <span class="material-symbols-outlined profile-chevron">
+            {{ showProfileDropdown ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+
+        <!-- Profile Dropdown -->
+        <div
+          class="dropdown-panel profile-panel"
+          *ngIf="showProfileDropdown"
+          (click)="$event.stopPropagation()"
+        >
+          <!-- User info -->
+          <div class="profile-user-info">
+            <div class="profile-avatar-lg">
+              <img
+                *ngIf="user.avatarUrl"
+                [src]="user.avatarUrl"
+                [alt]="user.name"
+                class="avatar-img"
+              />
+              <span *ngIf="!user.avatarUrl" class="avatar-initials">{{ getUserInitials() }}</span>
+            </div>
+            <div class="min-w-0">
+              <p class="profile-name mb-0">{{ user.name }}</p>
+              <p class="profile-email mb-0">{{ user.email }}</p>
+              <span class="profile-role" *ngIf="user.role">{{ user.role }}</span>
+            </div>
+          </div>
+
+          <div class="profile-sep"></div>
+
+          <!-- Menu items -->
+          <ng-container *ngFor="let item of profileMenuItems">
+            <div class="profile-sep" *ngIf="item.dividerBefore"></div>
+            <button
+              class="profile-menu-item"
+              [class.profile-menu-item--danger]="item.isDanger"
+              (click)="onProfileMenuClick(item)"
+            >
+              <span class="material-symbols-outlined">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+            </button>
+          </ng-container>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</header>

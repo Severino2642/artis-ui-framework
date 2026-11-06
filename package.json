@@ -1,0 +1,45 @@
+{
+  "name": "artis-ui-framework",
+  "version": "1.1.0",
+  "scripts": {
+    "start": "ng serve demo",
+    "build:libs": "ng build theme && ng build toaster && ng build api && ng build ui",
+    "build:demo": "ng build demo",
+    "build": "npm run build:libs && npm run build:demo",
+    "test": "npm run lint:tokens && ng test theme --no-watch && ng test toaster --no-watch && ng test api --no-watch && ng test ui --no-watch",
+    "test:coverage": "ng test theme --no-watch --coverage && ng test toaster --no-watch --coverage && ng test api --no-watch --coverage && ng test ui --no-watch --coverage",
+    "docs:tokens": "node scripts/generate-token-docs.mjs",
+    "pack:libs": "node scripts/pack-libs.mjs",
+    "lint:tokens": "node scripts/check-tokens.mjs",
+    "docs:manual": "node scripts/generate-manual-api.mjs"
+  },
+  "private": true,
+  "packageManager": "npm@10.9.7",
+  "dependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.29",
+    "@angular/cli": "^21.2.29",
+    "@angular/compiler-cli": "^21.2.0",
+    "@vitest/coverage-v8": "^4.1.12",
+    "axe-core": "^4.14.0",
+    "jsdom": "^28.0.0",
+    "ng-packagr": "^21.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  },
+  "description": "Framework Angular interne Artis : @artis/theme, @artis/toaster, @artis/api, @artis/ui + application de démonstration.",
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10"
+  }
+}

@@ -1,0 +1,99 @@
+:host {
+  position: fixed;
+  z-index: var(--art-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--art-space-2);
+  width: min(380px, calc(100vw - var(--art-space-8)));
+  padding: var(--art-space-4);
+  pointer-events: none;
+  font-family: var(--art-font-sans);
+}
+:host(.art-toaster--top-right)     { top: 0; right: 0; }
+:host(.art-toaster--top-left)      { top: 0; left: 0; }
+:host(.art-toaster--top-center)    { top: 0; left: 50%; transform: translateX(-50%); }
+:host(.art-toaster--bottom-right)  { bottom: 0; right: 0; flex-direction: column-reverse; }
+:host(.art-toaster--bottom-left)   { bottom: 0; left: 0; flex-direction: column-reverse; }
+:host(.art-toaster--bottom-center) { bottom: 0; left: 50%; transform: translateX(-50%); flex-direction: column-reverse; }
+
+.art-toast {
+  --_accent: var(--art-info);
+  --_soft: var(--art-info-soft);
+  --_border: var(--art-info-border);
+
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--art-space-3);
+  padding: var(--art-space-3) var(--art-space-3) var(--art-space-3) var(--art-space-4);
+  background: var(--art-surface);
+  color: var(--art-text);
+  border: var(--art-border-width) var(--art-border-style) var(--_border);
+  border-left: var(--art-space-1) var(--art-border-style) var(--_accent);
+  border-radius: var(--art-radius-lg);
+  box-shadow: var(--art-shadow-popup);
+  animation: art-toast-in var(--art-duration-slow) var(--art-easing-out) both;
+}
+.art-toast--success { --_accent: var(--art-success); --_soft: var(--art-success-soft); --_border: var(--art-success-border); }
+.art-toast--error   { --_accent: var(--art-danger);  --_soft: var(--art-danger-soft);  --_border: var(--art-danger-border); }
+.art-toast--warning { --_accent: var(--art-warning); --_soft: var(--art-warning-soft); --_border: var(--art-warning-border); }
+.art-toast--leaving { animation: art-toast-out var(--art-duration-base) var(--art-easing-in) both; }
+
+.art-toast__icon { color: var(--_accent); font-size: var(--art-text-2xl); line-height: var(--art-leading-none); flex: none; }
+.art-toast__body { flex: 1; min-width: 0; }
+.art-toast__title { margin: 0; font-size: var(--art-text-base); font-weight: var(--art-weight-bold); line-height: var(--art-leading-snug); }
+.art-toast__message { margin: var(--art-space-0-5) 0 0; font-size: var(--art-text-base); color: var(--art-text-secondary); line-height: var(--art-leading-normal); overflow-wrap: anywhere; }
+
+.art-toast__action {
+  margin-top: var(--art-space-2);
+  padding: var(--art-space-1) var(--art-space-3);
+  font: inherit;
+  font-size: var(--art-text-sm);
+  font-weight: var(--art-weight-semibold);
+  color: var(--_accent);
+  background: var(--_soft);
+  border: var(--art-border-width) var(--art-border-style) var(--_border);
+  border-radius: var(--art-radius-sm);
+  cursor: pointer;
+  transition: background var(--art-duration-fast) var(--art-easing-standard);
+}
+.art-toast__action:hover { background: var(--_border); }
+
+.art-toast__close {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--art-space-8);
+  height: var(--art-space-8);
+  margin: calc(var(--art-space-1) * -1) 0;
+  color: var(--art-text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--art-radius-sm);
+  cursor: pointer;
+}
+.art-toast__close:hover { background: var(--art-surface-subtle); color: var(--art-text); }
+.art-toast__close .material-symbols-outlined { font-size: var(--art-text-xl); }
+
+.art-toaster__queue {
+  align-self: flex-end;
+  margin: 0;
+  padding: var(--art-space-0-5) var(--art-space-2);
+  font-size: var(--art-text-xs);
+  font-weight: var(--art-weight-bold);
+  color: var(--art-text-inverse);
+  background: var(--art-inverse-surface);
+  border-radius: var(--art-radius-full);
+  pointer-events: auto;
+}
+
+@keyframes art-toast-in  { from { opacity: 0; transform: translateX(var(--art-space-6)); } to { opacity: 1; transform: none; } }
+@keyframes art-toast-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(var(--art-space-6)); } }
+
+:host(.art-toaster--top-center) .art-toast,
+:host(.art-toaster--bottom-center) .art-toast { animation-name: art-toast-in-y; }
+@keyframes art-toast-in-y { from { opacity: 0; transform: translateY(calc(var(--art-space-4) * -1)); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .art-toast, .art-toast--leaving { animation: none; }
+}

@@ -1,0 +1,271 @@
+<!-- ================================================================
+     FORM-FIELD — Renders a single field of any type
+================================================================ -->
+<div class="ff-wrapper" *ngIf="config.visible !== false">
+
+  <!-- Label (hidden in compact/table mode) -->
+  <div class="ff-label-row" *ngIf="!compact">
+  <label class="ff-label" [attr.for]="inputId">
+    {{ resolvedLabel }}
+    <span class="ff-required" *ngIf="isRequired" aria-hidden="true">*</span>
+    <!-- Async validation spinner (inside label, beside text) -->
+    <span class="ff-validating-icon" *ngIf="isValidating" [attr.title]="texts.validating">
+      <span class="ff-spinner-xs" role="status" [attr.aria-label]="texts.validating"></span>
+    </span>
+    <!-- Valid checkmark (shown only when touched + valid + not validating) -->
+<!--    <span-->
+<!--      class="material-symbols-outlined ff-valid-icon"-->
+<!--      *ngIf="isValid"-->
+<!--    >check_circle</span>-->
+  </label>
+  <art-info-tip *ngIf="config.explanation" [text]="config.explanation" [label]="resolvedLabel" [trigger]="config.explanationTrigger ?? 'click'" />
+  </div>
+
+  <!-- ── Field + attached buttons ────────────────────────────── -->
+  <div
+    class="ff-input-row"
+    [class.ff-input-row--error]="hasError"
+    [class.ff-input-row--valid]="isValid"
+  >
+
+    <!-- ════════════════════════════════════════════
+         TEXT / NUMBER / DATE / TIME / DATETIME
+    ═══════════════════════════════════════════════ -->
+    <ng-container *ngIf="['text','number','date','time','datetime'].includes(resolvedType)">
+      <input
+        class="ff-input"
+        [id]="inputId"
+        [attr.aria-invalid]="ariaInvalid"
+        [attr.aria-describedby]="describedBy"
+        [class.ff-input--error]="hasError"
+        [class.ff-input--valid]="isValid"
+        [type]="resolvedType === 'datetime' ? 'datetime-local' : resolvedType"
+        [value]="value ?? ''"
+        (input)="onSimpleChange($any($event.target).value)"
+        (blur)="onBlur()"
+        [placeholder]="config.label ?? config.name"
+        [required]="!!config.required"
+        [artAttrs]="config.customProperties || ''"
+        [readonly]="config.isReadOnly"
+      />
+    </ng-container>
+
+    <ng-container *ngIf="resolvedType === 'textarea'">
+      <textarea
+        class="ff-input ff-textarea"
+        [id]="inputId"
+        [attr.aria-invalid]="ariaInvalid"
+        [attr.aria-describedby]="describedBy"
+        [class.ff-input--error]="hasError"
+        [class.ff-input--valid]="isValid"
+        [value]="value ?? ''"
+        (input)="onSimpleChange($any($event.target).value)"
+        (blur)="onBlur()"
+        [placeholder]="config.label ?? config.name"
+        [required]="!!config.required"
+        [artAttrs]="config.customProperties || ''"
+        rows="3"
+        [readonly]="config.isReadOnly"
+      ></textarea>
+    </ng-container>
+
+    <!-- ════════════════════════════════════════════
+         SELECT (+ boolean)
+    ═══════════════════════════════════════════════ -->
+    <ng-container *ngIf="resolvedType === 'select'">
+      <div class="ff-select-wrap">
+        <select
+          class="ff-input ff-select"
+          [id]="inputId"
+          [attr.aria-invalid]="ariaInvalid"
+          [attr.aria-describedby]="describedBy"
+          [class.ff-input--error]="hasError"
+          [class.ff-input--valid]="isValid"
+          [value]="value"
+          (change)="onSimpleChange($any($event.target).value)"
+          (blur)="onBlur()"
+          [required]="!!config.required"
+          [artAttrs]="config.customProperties || ''"
+          [disabled]="config.isReadOnly"
+        >
+          <option value="" disabled selected>{{ texts.select.choose }}</option>
+          <ng-container *ngIf="isBooleanField">
+            <option
+              *ngFor="let o of booleanOptions"
+              [value]="o.value"
+              [selected]="o.value === value"
+            >{{ o.label }}</option>
+          </ng-container>
+          <ng-container *ngIf="!isBooleanField">
+            <option
+              *ngFor="let opt of config.options"
+              [value]="opt[resolvedValueKey]"
+              [selected]="opt[resolvedValueKey] === value"
+            >{{ opt[resolvedLabelKey] }}</option>
+          </ng-container>
+        </select>
+        <span class="material-symbols-outlined ff-select-icon">expand_more</span>
+      </div>
+    </ng-container>
+
+    <!-- ════════════════════════════════════════════
+         MULTISELECT
+    ═══════════════════════════════════════════════ -->
+    <ng-container *ngIf="resolvedType === 'multiselect'">
+      <div
+        class="ff-multiselect"
+        [class.ff-multiselect--error]="hasError"
+        [class.ff-multiselect--valid]="isValid"
+      >
+        <div class="ff-select-wrap">
+          <select
+            class="ff-input ff-select"
+            (change)="toggleOption($any($event.target).value); $any($event.target).value = ''"
+            (blur)="onBlur()"
+          >
+            <option value="" disabled selected>{{ texts.select.add }}</option>
+            <option
+              *ngFor="let opt of config.options"
+              [value]="opt[resolvedValueKey]"
+              [disabled]="isSelected(opt[resolvedValueKey]) || config.isReadOnly"
+            >{{ opt[resolvedLabelKey] }}</option>
+          </select>
+          <span class="material-symbols-outlined ff-select-icon">expand_more</span>
+        </div>
+        <div class="ff-chips" *ngIf="selectedOptions.length > 0">
+          <span class="ff-chip" *ngFor="let v of selectedOptions">
+            {{ getLabelForValue(v) }}
+            <button type="button" *ngIf="!config.isReadOnly" class="ff-chip-remove" (click)="removeSelectedOption(v)">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ════════════════════════════════════════════
+         AUTOCOMPLETE
+    ═══════════════════════════════════════════════ -->
+    <ng-container *ngIf="resolvedType === 'autocomplete'">
+      <div class="ac-wrapper">
+        <div class="ff-input-row" style="flex:1">
+          <input
+            class="ff-input"
+            [id]="inputId"
+            role="combobox"
+            [attr.aria-expanded]="acOpen"
+            aria-autocomplete="list"
+            [attr.aria-invalid]="ariaInvalid"
+            [attr.aria-describedby]="describedBy"
+            [class.ff-input--error]="hasError"
+            [class.ff-input--valid]="isValid"
+            type="text"
+            [(ngModel)]="acQuery"
+            (input)="onAcInput()"
+            (focus)="onAcInput()"
+            (blur)="onBlur()"
+            [placeholder]="config.label ?? config.name"
+            autocomplete="off"
+            [artAttrs]="config.customProperties || ''"
+            [readonly]="config.isReadOnly"
+          />
+          <button type="button" class="ff-ac-search-btn" [attr.aria-label]="texts.search" (click)="triggerAcSearch()">
+            <span class="material-symbols-outlined">{{ acLoading ? 'hourglass_top' : 'search' }}</span>
+          </button>
+        </div>
+        <div class="ac-dropdown" *ngIf="acOpen && acSuggestions.length > 0">
+          <div
+            class="ac-item"
+            *ngFor="let s of acSuggestions"
+            (mousedown)="selectAcSuggestion(s)"
+          >
+            <span class="material-symbols-outlined ac-item-icon">search</span>
+            <span class="ac-item-label">{{ renderSuggestion(s) }}</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ════════════════════════════════════════════
+         INTERVAL
+    ═══════════════════════════════════════════════ -->
+    <ng-container *ngIf="resolvedType === 'interval'">
+      <div class="ff-interval">
+        <input
+          class="ff-input"
+          [id]="inputId"
+          [attr.aria-label]="resolvedLabel + ' — ' + texts.interval.min"
+          [attr.aria-invalid]="ariaInvalid"
+          [attr.aria-describedby]="describedBy"
+          [class.ff-input--error]="hasError"
+          [type]="intervalInputType"
+          [(ngModel)]="intervalMin"
+          (ngModelChange)="onIntervalChange()"
+          (blur)="onBlur()"
+          [placeholder]="texts.interval.min"
+          [artAttrs]="config.customProperties || ''"
+          [readonly]="config.isReadOnly"
+        />
+        <span class="ff-interval-sep">—</span>
+        <input
+          class="ff-input"
+          [attr.aria-label]="resolvedLabel + ' — ' + texts.interval.max"
+          [attr.aria-invalid]="ariaInvalid"
+          [class.ff-input--error]="hasError"
+          [type]="intervalInputType"
+          [(ngModel)]="intervalMax"
+          (ngModelChange)="onIntervalChange()"
+          (blur)="onBlur()"
+          [placeholder]="texts.interval.max"
+          [artAttrs]="config.customProperties || ''"
+          [readonly]="config.isReadOnly"
+        />
+      </div>
+    </ng-container>
+
+    <!-- ════════════════════════════════════════════
+         COLOR / SECRET / FILE / TYPE PERSONNALISÉ
+    ═══════════════════════════════════════════════ -->
+    <art-color-field *ngIf="resolvedType === 'color'"
+      [config]="config" [value]="value" [inputId]="inputId" [readonly]="!!config.isReadOnly" [invalid]="hasError"
+      [describedBy]="describedBy" [compact]="compact" (valueChange)="onSimpleChange($event)" (blurred)="onBlur()" />
+    <art-secret-field *ngIf="resolvedType === 'secret'"
+      [config]="config" [value]="value" [inputId]="inputId" [readonly]="!!config.isReadOnly" [invalid]="hasError"
+      [describedBy]="describedBy" [compact]="compact" (valueChange)="onSimpleChange($event)" (blurred)="onBlur()" />
+    <art-file-field *ngIf="resolvedType === 'file'"
+      [config]="config" [value]="value" [inputId]="inputId" [readonly]="!!config.isReadOnly" [invalid]="hasError"
+      [describedBy]="describedBy" [compact]="compact" (valueChange)="onSimpleChange($event)" (blurred)="onBlur()" />
+    <ng-container *ngIf="customType"><ng-container #customHost></ng-container></ng-container>
+
+    <!-- ── Attached field buttons (inchangés) ──────────────── -->
+    <ng-container *ngIf="config.buttons?.length">
+      <button
+        type="button"
+        class="ff-field-btn"
+        *ngFor="let btn of config.buttons"
+        [class]="'ff-field-btn ' + getBtnClass(btn.variant)"
+        [title]="btn.tooltip || btn.label || ''"
+        (click)="onFieldButtonClick(btn.id)"
+      >
+        <span class="material-symbols-outlined">{{ btn.icon }}</span>
+        <span *ngIf="btn.label && !compact">{{ btn.label }}</span>
+      </button>
+    </ng-container>
+
+  </div>
+  <!-- /ff-input-row -->
+
+  <!-- ════════════════════════════════════════════
+       VALIDATION ERRORS — affiché sous le champ
+  ═══════════════════════════════════════════════ -->
+  <div class="ff-errors" *ngIf="hasError" [id]="errorsId" role="alert" aria-live="polite">
+    <div
+      class="ff-error-item"
+      *ngFor="let err of validationErrors"
+    >
+      <span class="material-symbols-outlined ff-error-icon">error_outline</span>
+      <span class="ff-error-msg">{{ err.message }}</span>
+    </div>
+  </div>
+
+</div>

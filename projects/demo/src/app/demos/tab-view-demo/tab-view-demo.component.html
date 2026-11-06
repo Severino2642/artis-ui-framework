@@ -1,0 +1,62 @@
+<!-- ── Déclarer les templates ─────────────────────────── -->
+<ng-template #detailsTpl>
+  <div class="container-fluid py-3">
+    <h4>Détails du voyage</h4>
+    <p>Contenu de l'onglet Détails...</p>
+    <!--
+    <art-detail-view
+      [config]="itemDetailsConfig"
+      [data]="item"
+      (buttonClick)="onButton($event)"
+    ></art-detail-view>
+    -->
+  </div>
+</ng-template>
+
+<ng-template #arretsTpl>
+  <div class="container-fluid py-3">
+    <h4>Arrêts</h4>
+    <p>Liste des arrêts du trajet...</p>
+    <!--
+    <art-trip-stop-liste-onglet [idVoyage]="item.id"></art-trip-stop-liste-onglet>
+    -->
+  </div>
+</ng-template>
+
+<ng-template #carteTpl>
+  <div class="container-fluid py-3">
+    <h4>Carte</h4>
+    <!--
+    <art-map-viewer
+      *ngIf="showViewer"
+      [config]="mapViewerConfig"
+      (close)="showViewer = false"
+    ></art-map-viewer>
+    -->
+  </div>
+</ng-template>
+
+<ng-template #passagersTpl>
+  <div class="container-fluid py-3"><h4>Passagers</h4></div>
+</ng-template>
+
+<ng-template #documentsTpl>
+  <div class="container-fluid py-3"><h4>Documents</h4></div>
+</ng-template>
+
+<ng-template #facturationTpl>
+  <div class="container-fluid py-3"><h4>Facturation</h4></div>
+</ng-template>
+
+<ng-template #historiqueTpl>
+  <div class="container-fluid py-3"><h4>Historique</h4></div>
+</ng-template>
+
+<!-- ── TabView ─────────────────────────────────────────── -->
+<div class="container-fluid py-3">
+  <art-tab-view
+    [tabs]="tabs"
+    activeTabId="details"
+    (tabChange)="onTabChange($event)"
+  ></art-tab-view>
+</div>

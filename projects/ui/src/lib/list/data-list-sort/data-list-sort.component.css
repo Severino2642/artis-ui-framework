@@ -1,0 +1,139 @@
+/* ================================================================
+   DL-SORT — Sort dropdown
+================================================================ */
+:host {
+  display: inline-block;
+  position: relative;
+  font-family: var(--art-font-sans);
+}
+
+.sort-wrapper { position: relative; display: inline-block; }
+
+/* Reuse toolbar btn style */
+.dl-toolbar-btn {
+  display: inline-flex; align-items: center; gap: var(--art-space-1-5);
+  height: 36px; padding: 0 var(--art-space-3-5);
+  border: 1.5px solid var(--art-border);
+  border-radius: var(--art-radius-md); background: var(--art-surface);
+  font-size: var(--art-text-base); font-weight: var(--art-weight-semibold); font-family: inherit;
+  cursor: pointer; color: var(--art-text-secondary);
+  transition: all var(--art-duration-base) var(--art-easing-standard);
+  white-space: nowrap;
+}
+.dl-toolbar-btn .material-symbols-outlined { font-size: var(--art-text-xl); }
+.dl-toolbar-btn:hover { background: var(--art-primary-soft); border-color: var(--art-primary-border); color: var(--art-primary); }
+.dl-toolbar-btn--active { background: var(--art-primary-softer); border-color: var(--art-primary-border); color: var(--art-primary); }
+
+.sort-badge {
+  min-width: 18px; height: 18px;
+  background: var(--art-primary); color: var(--art-text-inverse);
+  font-size: var(--art-text-2xs); font-weight: var(--art-weight-bold);
+  border-radius: var(--art-radius-full);
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 var(--art-space-1);
+}
+
+/* Dropdown panel */
+.sort-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 260px;
+  background: var(--art-surface);
+  border: var(--art-border-width) solid var(--art-border);
+  border-radius: var(--art-radius-lg);
+  box-shadow: var(--art-shadow-popup);
+  z-index: var(--art-z-popover);
+  overflow: hidden;
+  animation: sortFadeIn var(--art-duration-fast) var(--art-easing-standard) both;
+}
+.sort-dropdown--centered {
+  left: -70%;
+  transform: translateX(-50%);
+}
+
+.sort-dropdown-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--art-space-3) var(--art-space-3-5) var(--art-space-2-5);
+  border-bottom: var(--art-border-width) solid var(--art-surface-subtle);
+}
+.sort-dd-title { font-size: var(--art-text-base); font-weight: var(--art-weight-bold); color: var(--art-text); }
+
+.sort-clear-btn {
+  display: inline-flex; align-items: center; gap: var(--art-space-1);
+  font-size: var(--art-text-xs); font-weight: var(--art-weight-semibold); color: var(--art-danger);
+  background: transparent; border: none; cursor: pointer;
+  padding: var(--art-space-0-5) var(--art-space-1-5); border-radius: var(--art-radius-xs);
+  transition: background var(--art-duration-fast);
+}
+.sort-clear-btn:hover { background: var(--art-danger-soft); }
+.sort-clear-btn .material-symbols-outlined { font-size: var(--art-text-base); }
+
+/* Active chips */
+.sort-active-chips {
+  display: flex; flex-wrap: wrap; gap: var(--art-space-1-5);
+  padding: var(--art-space-2) var(--art-space-3) var(--art-space-1);
+}
+.sort-chip {
+  display: inline-flex; align-items: center; gap: var(--art-space-1);
+  background: var(--art-primary-softer); border: var(--art-border-width) solid var(--art-primary-border);
+  border-radius: var(--art-radius-full); padding: var(--art-space-1) var(--art-space-2);
+  font-size: var(--art-text-xs); font-weight: var(--art-weight-semibold); color: var(--art-primary-strong);
+}
+.sort-chip-icon { font-size: var(--art-text-sm); }
+.sort-chip-remove {
+  display: flex; align-items: center;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--art-primary-strong); opacity: .7; padding: 0;
+  transition: opacity var(--art-duration-fast);
+}
+.sort-chip-remove:hover { opacity: 1; }
+.sort-chip-remove .material-symbols-outlined { font-size: var(--art-text-sm); }
+
+.sort-sep { height: 1px; background: var(--art-surface-subtle); margin: var(--art-space-1) 0; }
+
+/* Field list */
+.sort-field-list { padding: var(--art-space-1) 0 var(--art-space-1-5); }
+
+.sort-field-item {}
+
+.sort-field-row {
+  display: flex; align-items: center; gap: var(--art-space-2-5);
+  padding: var(--art-space-2-5) var(--art-space-3-5);
+  cursor: pointer;
+  transition: background var(--art-duration-fast);
+}
+.sort-field-row:hover { background: var(--art-primary-soft); }
+.sort-field-item--active .sort-field-row { background: var(--art-primary-softer); }
+
+.sort-field-icon { font-size: var(--art-text-lg); color: var(--art-text-subtle); }
+.sort-field-label { flex: 1; font-size: var(--art-text-base); font-weight: var(--art-weight-medium); color: var(--art-text); }
+.sort-field-active-badge {
+  font-size: var(--art-text-xs); font-weight: var(--art-weight-bold); color: var(--art-primary);
+  background: var(--art-surface); border-radius: var(--art-radius-xs); padding: 1px var(--art-space-1-5);
+}
+.sort-field-chevron { font-size: var(--art-text-xl); color: var(--art-text-subtle); }
+
+/* Direction sub-menu */
+.sort-dir-menu {
+  background: var(--art-bg);
+  border-top: var(--art-border-width) solid var(--art-surface-subtle);
+  border-bottom: var(--art-border-width) solid var(--art-surface-subtle);
+  padding: var(--art-space-0-5) 0;
+}
+.sort-dir-item {
+  display: flex; align-items: center; gap: var(--art-space-2-5);
+  padding: var(--art-space-2-5) var(--art-space-3-5) var(--art-space-2-5) 36px;
+  cursor: pointer; font-size: var(--art-text-sm);
+  color: var(--art-text-secondary); font-weight: var(--art-weight-medium);
+  transition: background var(--art-duration-fast);
+}
+.sort-dir-item:hover { background: var(--art-primary-soft); }
+.sort-dir-item--selected { color: var(--art-primary); font-weight: var(--art-weight-bold); }
+.sort-dir-item .material-symbols-outlined { font-size: var(--art-text-lg); }
+.sort-dir-check { margin-left: auto; font-size: var(--art-text-lg); color: var(--art-primary); }
+
+@keyframes sortFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

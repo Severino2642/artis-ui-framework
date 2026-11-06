@@ -1,0 +1,362 @@
+<!-- ================================================================
+     DL-TABLE — Table view + Card view + Pagination
+================================================================ -->
+<div class="dlt-wrapper">
+
+  <!-- ── Selection bar ───────────────────────────────────────── -->
+  <div class="dlt-selection-bar" *ngIf="showCheckbox && selectedRows.size > 0">
+    <span class="dlt-sel-label">
+      <span class="material-symbols-outlined">check_circle</span>
+      {{ selectedRows.size }} ligne(s) sélectionnée(s)
+    </span>
+    <button class="dlt-sel-action-btn" (click)="onSelectedAction()">
+      <span class="material-symbols-outlined">{{ selectedButtonIcon }}</span>
+      {{ selectedButtonLabel }}
+    </button>
+    <button class="dlt-sel-clear-btn" (click)="toggleSelectAll(false)">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       TABLE VIEW
+  ═════════════════════════════════════════════════════════ -->
+  <div class="dlt-table-container" *ngIf="viewMode === 'table'">
+    <table class="dlt-table">
+      <thead>
+      <tr>
+        <!-- Checkbox -->
+        <th class="dlt-th dlt-th--check" *ngIf="showCheckbox">
+          <input
+            type="checkbox"
+            class="dlt-checkbox"
+            [checked]="allSelected"
+            [indeterminate]="someSelected"
+            (change)="toggleSelectAll($any($event.target).checked)"
+          />
+        </th>
+        <!-- Row number -->
+        <th class="dlt-th dlt-th--num">N°</th>
+        <!-- Data columns -->
+        <th
+          class="dlt-th"
+          *ngFor="let col of visibleColumns"
+          [style.width]="col.width"
+          [attr.aria-sort]="ariaSort(col)"
+        >
+          <div class="dlt-th-inner">
+            <art-label [text]="col.title" [explanation]="col.explanation" [trigger]="col.explanationTrigger ?? 'click'" />
+            <button *ngIf="col.sortable" type="button" class="dlt-th-btn" [class.dlt-th-btn--on]="sortDir(col)"
+                    [attr.aria-label]="texts.list.sortBy(col.title)" [title]="texts.list.sortBy(col.title)" (click)="toggleSort(col)">
+              <span class="material-symbols-outlined" aria-hidden="true">{{ sortIcon(col) }}</span>
+            </button>
+            <art-dl-column-filter *ngIf="columnFilterFields[col.key] as ff" [field]="ff" [value]="filterValueOf(col)" [label]="col.title"
+                                  (applied)="onColumnFilter(col, $event)" />
+          </div>
+        </th>
+        <!-- Actions -->
+        <th class="dlt-th dlt-th--actions" *ngIf="showActions && actions.length > 0">
+          Actions
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- Empty state -->
+      <tr *ngIf="visibleData.length === 0">
+        <td
+          [colSpan]="visibleColumns.length + (showCheckbox ? 1 : 0) + 2"
+          class="dlt-empty-cell"
+        >
+          <div class="dlt-empty">
+            <span class="material-symbols-outlined">inbox</span>
+            <p>{{ texts.list.noData }}</p>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Data rows -->
+      <tr
+        *ngFor="let row of visibleData; let i = index"
+        class="dlt-tr"
+        [class.dlt-tr--selected]="selectedRows.has(row)"
+      >
+        <!-- Checkbox -->
+        <td class="dlt-td dlt-td--check" *ngIf="showCheckbox">
+          <input
+            type="checkbox"
+            class="dlt-checkbox"
+            [checked]="selectedRows.has(row)"
+            (change)="toggleRow(row)"
+          />
+        </td>
+
+        <!-- Row number -->
+        <td class="dlt-td dlt-td--num">
+          {{ (page - 1) * pageSize + i + 1 }}
+        </td>
+
+        <!-- Data columns -->
+        <td class="dlt-td" *ngFor="let col of visibleColumns">
+          <div class="row g-1 align-items-start" [style.width]="col.width">
+            <ng-container *ngFor="let sec of col.sections">
+              <div [class]="'col-md-' + (sec.colMd ?? 12)">
+                <ng-container *ngFor="let f of sec.fields">
+                  <!-- Image -->
+                  <img
+                    *ngIf="isImageField(f)"
+                    [src]="getCellValue(row, f) || 'assets/placeholder.png'"
+                    [alt]="f.attribute"
+                    class="dlt-img"
+                    [class]="f.cssClass"
+                    [style]="f.style+''"
+                  />
+                  <!-- Badge -->
+                  <span
+                    *ngIf="isBadgeField(f)"
+                    class="dlt-badge"
+                    [class.dlt-clickable]="f.filterOnClick" [attr.role]="f.filterOnClick ? 'button' : null" [attr.tabindex]="f.filterOnClick ? 0 : null" [attr.title]="f.filterOnClick ? texts.list.clickToFilter : null" [attr.aria-pressed]="f.filterOnClick ? isCellFiltered(row, f) : null" (click)="onCellClick(f, row)" (keydown.enter)="onCellClick(f, row)"
+                    [class]="f.cssClass"
+                    [style]="'--badge-c:' + badgeColor(row,f) + ';' + (f.style ?? '')"
+                  >
+                      <span class="dlt-badge-dot"></span>
+                    {{ displayValue(row, f) }}
+                    </span>
+                  <!-- Link -->
+                  <a
+                    *ngIf="isLinkField(f)"
+                    [href]="f.isRedirectLink ? resolveLink(row, f) : null"
+                    [routerLink]="[!f.isRedirectLink ? resolveLink(row, f) : null]"
+                    [target]="f.linkTarget ?? '_self'"
+                    class="dlt-link"
+                    [class]="f.cssClass"
+                    [style]="f.style"
+                  >{{ displayValue(row, f) }}</a>
+                  <!-- Text / number / date -->
+                  <span
+                    *ngIf="!isImageField(f) && !isBadgeField(f) && !isLinkField(f)"
+                    [class.dlt-clickable]="f.filterOnClick" [attr.role]="f.filterOnClick ? 'button' : null" [attr.tabindex]="f.filterOnClick ? 0 : null" [attr.title]="f.filterOnClick ? texts.list.clickToFilter : null" [attr.aria-pressed]="f.filterOnClick ? isCellFiltered(row, f) : null" (click)="onCellClick(f, row)" (keydown.enter)="onCellClick(f, row)"
+                    [class]="f.cssClass"
+                    [style]="f.style"
+                  >
+                      {{ displayValue(row, f) }}
+                    <span class="dlt-unit" *ngIf="f.unit"> {{ f.unit }}</span>
+                    </span>
+                </ng-container>
+              </div>
+            </ng-container>
+          </div>
+        </td>
+
+        <!-- Actions -->
+        <td
+          class="dlt-td dlt-td--actions"
+          *ngIf="showActions && actions.length > 0"
+        >
+          <div class="dlt-action-wrap" style="position:relative">
+            <button
+              class="dlt-action-btn"
+              (click)="toggleActionMenu(i, $event)"
+              [class.dlt-action-btn--open]="openActionMenuIndex === i"
+            >
+              <span class="material-symbols-outlined">more_vert</span>
+            </button>
+            <!-- Dropdown menu -->
+            <div class="dlt-action-menu" *ngIf="openActionMenuIndex === i">
+              <ng-container *ngFor="let action of actions">
+                <div class="dlt-action-sep" *ngIf="action.dividerBefore"></div>
+                <button
+                  class="dlt-action-item"
+                  [class]="'dlt-action-item ' + getActionVariantClass(action.variant)"
+                  (click)="onAction(action.id, row, $event)"
+                >
+                  <span class="material-symbols-outlined" *ngIf="action.icon">{{ action.icon }}</span>
+                  {{ action.label }}
+                </button>
+              </ng-container>
+            </div>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- /table view -->
+
+  <!-- ════════════════════════════════════════════════════════
+       CARD VIEW
+  ═════════════════════════════════════════════════════════ -->
+  <div class="dlt-cards" *ngIf="viewMode === 'card'">
+
+    <!-- Empty -->
+    <div class="dlt-empty" *ngIf="visibleData.length === 0">
+      <span class="material-symbols-outlined">inbox</span>
+      <p>{{ texts.list.noData }}</p>
+    </div>
+
+    <!-- Row cards -->
+    <div
+      class="dlt-card"
+      *ngFor="let row of visibleData; let i = index"
+      [class.dlt-card--selected]="selectedRows.has(row)"
+    >
+      <!-- Card header (always visible) -->
+      <div class="dlt-card-header" (click)="toggleCard(i)">
+        <div class="dlt-card-header-left">
+          <!-- Checkbox -->
+          <input
+            *ngIf="showCheckbox"
+            type="checkbox"
+            class="dlt-checkbox"
+            [checked]="selectedRows.has(row)"
+            (change)="toggleRow(row)"
+            (click)="$event.stopPropagation()"
+          />
+          <!-- Header pinned fields from columns with showInCardHeader=true -->
+          <ng-container *ngFor="let col of visibleColumns">
+            <ng-container *ngIf="col.showInCardHeader && col.cardHeaderAlign !== 'right'">
+              <div class="dlt-card-header-field" *ngFor="let sec of col.sections">
+                <ng-container *ngFor="let f of sec.fields">
+                  <!-- Image in header -->
+                  <img
+                    *ngIf="isImageField(f)"
+                    [src]="getCellValue(row,f) || 'assets/placeholder.png'"
+                    class="dlt-card-header-img"
+                  />
+                  <!-- Badge in header -->
+                  <span
+                    *ngIf="isBadgeField(f)"
+                    class="dlt-badge"
+                    [style]="'--badge-c:' + badgeColor(row,f)">
+                    <span class="dlt-badge-dot"></span>{{ displayValue(row,f) }}
+                  </span>
+                  <!-- Text in header -->
+                  <span
+                    *ngIf="!isImageField(f) && !isBadgeField(f) && !isLinkField(f)"
+                    class="dlt-card-header-text"
+                  >{{ displayValue(row,f) }}</span>
+                </ng-container>
+              </div>
+            </ng-container>
+          </ng-container>
+        </div>
+
+        <div class="dlt-card-header-right">
+          <!-- Right-aligned pinned fields -->
+          <ng-container *ngFor="let col of visibleColumns">
+            <ng-container *ngIf="col.showInCardHeader && col.cardHeaderAlign === 'right'">
+              <ng-container *ngFor="let sec of col.sections">
+                <ng-container *ngFor="let f of sec.fields">
+                  <span
+                    *ngIf="isBadgeField(f)"
+                    class="dlt-badge"
+                    [style]="'--badge-c:' + badgeColor(row,f)"
+                  ><span class="dlt-badge-dot"></span>{{ displayValue(row,f) }}</span>
+                  <span *ngIf="!isBadgeField(f) && !isImageField(f)" class="dlt-card-header-right-text">
+                    {{ displayValue(row,f) }}
+                  </span>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+
+          <!-- Actions always shown on right -->
+          <div class="dlt-action-wrap" *ngIf="showActions && actions.length > 0" style="position:relative" (click)="$event.stopPropagation()">
+            <button
+              class="dlt-action-btn"
+              (click)="toggleActionMenu(i, $event)"
+              [class.dlt-action-btn--open]="openActionMenuIndex === i"
+            >
+              <span class="material-symbols-outlined">more_vert</span>
+            </button>
+            <div class="dlt-action-menu dlt-action-menu--right" *ngIf="openActionMenuIndex === i">
+              <ng-container *ngFor="let action of actions">
+                <div class="dlt-action-sep" *ngIf="action.dividerBefore"></div>
+                <button
+                  class="dlt-action-item"
+                  [class]="'dlt-action-item ' + getActionVariantClass(action.variant)"
+                  (click)="onAction(action.id, row, $event)"
+                >
+                  <span class="material-symbols-outlined" *ngIf="action.icon">{{ action.icon }}</span>
+                  {{ action.label }}
+                </button>
+              </ng-container>
+            </div>
+          </div>
+          <!-- Expand chevron -->
+          <span class="material-symbols-outlined dlt-card-chevron">
+            {{ isCardExpanded(i) ? 'expand_less' : 'expand_more' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Card body (expandable) -->
+      <div class="dlt-card-body" *ngIf="isCardExpanded(i)">
+        <ng-container *ngFor="let col of visibleColumns">
+          <div class="dlt-card-col-section">
+            <p class="dlt-card-col-title"><art-label [text]="col.title" [explanation]="col.explanation" [trigger]="col.explanationTrigger ?? 'click'" /></p>
+            <div class="dlt-card-col-content">
+              <ng-container *ngFor="let sec of col.sections">
+                <ng-container *ngFor="let f of sec.fields">
+                  <!-- Image -->
+                  <img *ngIf="isImageField(f)"
+                       [src]="getCellValue(row,f) || 'assets/placeholder.png'"
+                       class="dlt-card-img" [style]="f.style"
+                  />
+                  <!-- Badge -->
+                  <span *ngIf="isBadgeField(f)"
+                        class="dlt-badge"
+                        [class.dlt-clickable]="f.filterOnClick" [attr.role]="f.filterOnClick ? 'button' : null" [attr.tabindex]="f.filterOnClick ? 0 : null" [attr.title]="f.filterOnClick ? texts.list.clickToFilter : null" [attr.aria-pressed]="f.filterOnClick ? isCellFiltered(row, f) : null" (click)="onCellClick(f, row)" (keydown.enter)="onCellClick(f, row)"
+                        [class]="f.cssClass"
+                        [style]="'--badge-c:' + badgeColor(row,f) + ';' + (f.style ?? '')">
+                    <span class="dlt-badge-dot"></span>{{ displayValue(row,f) }}
+                  </span>
+                  <!-- Link -->
+                  <a *ngIf="isLinkField(f)"
+                     [href]="resolveLink(row,f)"
+                     [target]="f.linkTarget ?? '_self'"
+                     class="dlt-link" [style]="f.style">
+                    {{ displayValue(row,f) }}
+                  </a>
+                  <!-- Text -->
+                  <span *ngIf="!isImageField(f) && !isBadgeField(f) && !isLinkField(f)"
+                        [class.dlt-clickable]="f.filterOnClick" [attr.role]="f.filterOnClick ? 'button' : null" [attr.tabindex]="f.filterOnClick ? 0 : null" [attr.title]="f.filterOnClick ? texts.list.clickToFilter : null" [attr.aria-pressed]="f.filterOnClick ? isCellFiltered(row, f) : null" (click)="onCellClick(f, row)" (keydown.enter)="onCellClick(f, row)"
+                        [class]="f.cssClass" [style]="f.style">
+                    {{ displayValue(row,f) }}
+                    <span class="dlt-unit" *ngIf="f.unit"> {{ f.unit }}</span>
+                  </span>
+                </ng-container>
+              </ng-container>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+  <!-- /card view -->
+
+  <!-- ── Pagination ───────────────────────────────────────────── -->
+  <div class="dlt-pagination" *ngIf="totalPagesCount > 1 || effectiveTotal > 0">
+    <span class="dlt-pagination-label">{{ paginationLabel }}</span>
+
+    <div class="dlt-pagination-controls">
+      <button class="dlt-page-btn" (click)="goToPage(page - 1)" [disabled]="page === 1">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+
+      <ng-container *ngFor="let p of pageNumbers">
+        <span class="dlt-page-ellipsis" *ngIf="p === -1">…</span>
+        <button
+          *ngIf="p !== -1"
+          class="dlt-page-btn dlt-page-btn--num"
+          [class.dlt-page-btn--active]="p === page"
+          (click)="goToPage(p)"
+        >{{ p }}</button>
+      </ng-container>
+
+      <button class="dlt-page-btn" (click)="goToPage(page + 1)" [disabled]="page === totalPagesCount">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,138 @@
+<!-- ================================================================
+     DL-FILTER — Utilise art-form-field (tous les types form-builder)
+================================================================ -->
+<div class="dlf-wrapper">
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <div class="dlf-header">
+    <div class="dlf-header-left">
+      <div class="dlf-header-icon">
+        <span class="material-symbols-outlined">tune</span>
+      </div>
+      <div>
+        <h3 class="dlf-title">Filtres</h3>
+        <p class="dlf-subtitle" *ngIf="activeCount > 0">
+          {{ activeCount }} filtre{{ activeCount > 1 ? 's' : '' }}
+          actif{{ activeCount > 1 ? 's' : '' }}
+        </p>
+        <p class="dlf-subtitle" *ngIf="activeCount === 0">
+          Affinez votre recherche
+        </p>
+      </div>
+    </div>
+    <button class="dlf-close-btn" (click)="closePanel.emit()">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+
+  <!-- ── Body : grille de champs ─────────────────────────────── -->
+  <div class="dlf-body">
+    <div class="row g-3">
+      <div
+        *ngFor="let f of resolvedFields"
+        [class]="getColClass(f)"
+      >
+        <!--
+          art-form-field gère tous les types :
+          text, number, date, time, datetime, color, textarea,
+          select, multiselect, autocomplete, interval
+          + validation complète (required, email, pattern, custom, async…)
+        -->
+        <art-form-field
+          [config]="f"
+          [value]="filterValues[f.name]"
+          (valueChange)="onFieldChange(f.name, $event)"
+          [compact]="false"
+          [formValues]="filterValues"
+        ></art-form-field>
+      </div>
+    </div>
+  </div>
+  <!-- /body -->
+
+  <!-- ── Chips actifs ────────────────────────────────────────── -->
+  <div class="dlf-chips-row" *ngIf="activeCount > 0">
+
+    <ng-container *ngFor="let f of resolvedFields">
+      <ng-container *ngIf="hasValue(f)">
+
+        <!-- Chip interval (min/max) -->
+        <span class="dlf-chip" *ngIf="isInterval(f)">
+          <span class="dlf-chip-key"><art-label [text]="f.label ?? f.name" [explanation]="f.explanation" [trigger]="f.explanationTrigger ?? 'click'" /></span>
+          <span class="dlf-chip-val">
+            {{ filterValues[f.name]?.min ?? '∞' }} —
+            {{ filterValues[f.name]?.max ?? '∞' }}
+          </span>
+          <button class="dlf-chip-remove" (click)="clearField(f.name, f)">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </span>
+
+        <!-- Chips multiselect (une chip par valeur sélectionnée) -->
+        <ng-container *ngIf="isMultiselect(f)">
+          <span
+            class="dlf-chip"
+            *ngFor="let lbl of getMultiselectLabels(f, filterValues[f.name]); let vi = index"
+          >
+            <span class="dlf-chip-key"><art-label [text]="f.label ?? f.name" [explanation]="f.explanation" [trigger]="f.explanationTrigger ?? 'click'" /></span>
+            <span class="dlf-chip-val">{{ lbl }}</span>
+            <button
+              class="dlf-chip-remove"
+              (click)="removeMultiselectValue(f.name, filterValues[f.name][vi])"
+            >
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </span>
+        </ng-container>
+
+        <!-- Chip simple (text, number, date, select, autocomplete…) -->
+        <span
+          class="dlf-chip"
+          *ngIf="!isInterval(f) && !isMultiselect(f)"
+        >
+          <span class="dlf-chip-key"><art-label [text]="f.label ?? f.name" [explanation]="f.explanation" [trigger]="f.explanationTrigger ?? 'click'" /></span>
+          <span class="dlf-chip-val">
+            {{ getChipLabel(f, filterValues[f.name]) }}
+          </span>
+          <button class="dlf-chip-remove" (click)="clearField(f.name, f)">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </span>
+
+      </ng-container>
+    </ng-container>
+
+  </div>
+  <!-- /chips -->
+
+  <!-- ── Footer ──────────────────────────────────────────────── -->
+  <div class="dlf-footer">
+
+    <button class="dlf-btn dlf-btn--reset" (click)="onReset()">
+      <span class="material-symbols-outlined">restart_alt</span>
+      Réinitialiser
+    </button>
+
+    <div class="dlf-footer-right">
+      <button class="dlf-btn dlf-btn--cancel" (click)="closePanel.emit()">
+        Annuler
+      </button>
+
+      <button
+        class="dlf-btn dlf-btn--apply"
+        (click)="onApply()"
+        [disabled]="isValidating"
+      >
+        <!-- Spinner pendant validation async -->
+        <span class="dlf-spinner" *ngIf="isValidating"></span>
+        <span class="material-symbols-outlined" *ngIf="!isValidating">check</span>
+        {{ isValidating ? 'Validation...' : 'Appliquer' }}
+        <span class="dlf-apply-count" *ngIf="activeCount > 0 && !isValidating">
+          {{ activeCount }}
+        </span>
+      </button>
+    </div>
+
+  </div>
+
+</div>

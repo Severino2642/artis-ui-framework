@@ -1,0 +1,267 @@
+/* ────────────────────────────────────────────────────────────────
+ * Toutes les valeurs par défaut sont définies ICI, en dur — ce
+ * composant ne dépend d'aucune variable globale de l'application.
+ * Pour personnaliser une instance :
+ *   1) via l'@Input() theme (voir footer.component.ts), ou
+ *   2) directement en CSS depuis le parent :
+ *      art-footer { --footer-primary: var(--art-accent); }
+ * ──────────────────────────────────────────────────────────────── */
+:host {
+  --footer-bg: var(--art-bg);
+  --footer-border: var(--art-border);
+  --footer-text: var(--art-text);
+  --footer-text-2: var(--art-text-muted);
+  --footer-text-3: var(--art-text-subtle);
+  --footer-primary: var(--art-primary);
+  --footer-accent: var(--art-primary-light);
+  --footer-hover: var(--art-primary-soft);
+
+  --footer-radius-sm: var(--art-radius-sm);
+  --footer-radius-md: var(--art-radius-lg);
+  --footer-shadow: var(--art-shadow-sm);
+
+  --footer-duration: var(--art-duration-base);
+  --footer-easing: var(--art-easing-standard);
+  --footer-font: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --footer-max-width: 1200px;
+  --footer-padding-x: 24px;
+  --footer-padding-y: 38px;
+  --footer-sidebar-offset: 240px;
+
+  display: block;
+  font-family: var(--footer-font);
+}
+
+.art-footer {
+  background: var(--footer-bg);
+  border-top: var(--art-border-width) solid var(--footer-border);
+  padding: var(--footer-padding-y) var(--footer-padding-x);
+  color: var(--footer-text-2);
+  transition: margin-left var(--footer-duration) var(--footer-easing);
+}
+
+.art-footer--offset {
+  /* N'applique le décalage qu'à partir du breakpoint desktop pour ne
+     pas manger l'espace disponible sur mobile. */
+}
+
+@media (min-width: 768px) {
+  .art-footer--offset {
+    margin-left: var(--footer-sidebar-offset);
+  }
+}
+
+.art-footer--minimal {
+  /*padding-top: var(--art-space-2-5);*/
+}
+
+/* ── Top: brand + link groups ─────────────────────────────────── */
+.art-footer__top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--art-space-10);
+  justify-content: space-between;
+  max-width: var(--footer-max-width);
+  margin: 0 auto;
+}
+
+.art-footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--art-space-4);
+  max-width: 280px;
+  flex: 1 1 220px;
+}
+
+.art-footer__mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--footer-radius-md);
+  background: var(--footer-primary);
+  color: var(--art-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--art-weight-bold);
+  font-size: var(--art-text-lg);
+  box-shadow: var(--footer-shadow);
+  overflow: hidden;
+}
+
+.art-footer__mark-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.art-footer__brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--art-space-1);
+}
+
+.art-footer__brand-name {
+  font-weight: var(--art-weight-bold);
+  font-size: var(--art-text-lg);
+  color: var(--footer-text);
+  letter-spacing: -0.01em;
+}
+
+.art-footer__tagline {
+  margin: 0;
+  font-size: var(--art-text-base);
+  line-height: var(--art-leading-normal);
+  color: var(--footer-text-3);
+}
+
+.art-footer__social {
+  display: flex;
+  gap: var(--art-space-2);
+  margin-top: var(--art-space-1);
+}
+
+.art-footer__social-link {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--footer-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--footer-text-2);
+  background: transparent;
+  transition: background var(--footer-duration) var(--footer-easing),
+  color var(--footer-duration) var(--footer-easing);
+}
+
+.art-footer__social-link:hover {
+  background: var(--footer-hover);
+  color: var(--footer-primary);
+}
+
+.art-footer__social-link:focus-visible {
+  outline: 2px solid var(--footer-accent);
+  outline-offset: 2px;
+}
+
+.art-footer__groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--art-space-8) var(--art-space-12);
+  flex: 2 1 480px;
+}
+
+.art-footer__group {
+  min-width: 140px;
+}
+
+.art-footer__group-title {
+  margin: 0 0 var(--art-space-3);
+  font-size: var(--art-text-sm);
+  font-weight: var(--art-weight-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--footer-text);
+}
+
+.art-footer__group-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--art-space-2-5);
+}
+
+.art-footer__link {
+  font-size: var(--art-text-md);
+  color: var(--footer-text-2);
+  text-decoration: none;
+  transition: color var(--footer-duration) var(--footer-easing);
+}
+
+.art-footer__link:hover {
+  color: var(--footer-primary);
+}
+
+.art-footer__link:focus-visible {
+  outline: 2px solid var(--footer-accent);
+  outline-offset: 2px;
+  border-radius: var(--footer-radius-sm);
+}
+
+/* ── Divider ───────────────────────────────────────────────────── */
+.art-footer__divider {
+  max-width: var(--footer-max-width);
+  margin: var(--art-space-10) auto var(--art-space-5);
+  height: 1px;
+  background: var(--footer-border);
+}
+
+/* ── Bottom bar ────────────────────────────────────────────────── */
+.art-footer__bottom {
+  max-width: var(--footer-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--art-space-3);
+}
+
+.art-footer__copyright {
+  margin: 0;
+  font-size: var(--art-text-base);
+  color: var(--footer-text-3);
+}
+
+.art-footer__legal {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--art-space-5);
+}
+
+.art-footer__legal-link {
+  font-size: var(--art-text-base);
+  color: var(--footer-text-3);
+  text-decoration: none;
+  transition: color var(--footer-duration) var(--footer-easing);
+}
+
+.art-footer__legal-link:hover {
+  color: var(--footer-primary);
+}
+
+.art-footer__legal-link:focus-visible {
+  outline: 2px solid var(--footer-accent);
+  outline-offset: 2px;
+  border-radius: var(--footer-radius-sm);
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .art-footer {
+    padding: var(--art-space-8) var(--art-space-5) var(--art-space-5);
+  }
+
+  .art-footer__groups {
+    gap: var(--art-space-6) var(--art-space-8);
+  }
+
+  .art-footer__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-footer,
+  .art-footer__social-link,
+  .art-footer__link,
+  .art-footer__legal-link {
+    transition: none;
+  }
+}

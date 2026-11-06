@@ -1,0 +1,91 @@
+<!-- ================================================================
+     TAB-VIEW — Barre d'onglets scrollable + contenu
+================================================================ -->
+<div class="tv-host" [class.tv-host--mobile]="isMobile">
+
+  <!-- ══════════════════════════════════════════════════════════
+       BARRE D'ONGLETS
+  ══════════════════════════════════════════════════════════ -->
+  <div class="tv-bar-wrap">
+
+    <!-- Flèche gauche (scroll indicator) -->
+    <span
+      class="tv-scroll-btn tv-scroll-btn--left" aria-hidden="true"
+      [class.tv-scroll-btn--visible]="canScrollLeft"
+      (click)="scrollBar('left')"
+      aria-label="Défiler à gauche"
+    >
+      <span class="material-symbols-outlined">chevron_left</span>
+    </span>
+
+    <!-- Barre scrollable -->
+    <div
+      class="tv-bar"
+      #tabBar
+      (scroll)="onTabBarScroll()"
+    >
+      <div class="tv-bar-inner" #tabBarInner role="tablist" aria-orientation="horizontal" (keydown)="onTabKeydown($event)">
+
+        <button type="button" role="tab" [id]="'tv-tab-' + tab.id" [attr.aria-controls]="'tv-panel-' + tab.id" [attr.tabindex]="isActive(tab.id) ? 0 : -1"
+          class="tv-tab"
+          *ngFor="let tab of tabs; let i = index"
+          [attr.data-tab-id]="tab.id"
+          [class.tv-tab--active]="isActive(tab.id)"
+          [class.tv-tab--disabled]="tab.disabled"
+          [attr.aria-selected]="isActive(tab.id)"
+          [attr.aria-disabled]="tab.disabled"
+          (click)="!tab.disabled && setActive(tab.id)"
+        >
+          <!-- Icône optionnelle -->
+          <span
+            class="material-symbols-outlined tv-tab-icon"
+            *ngIf="tab.icon"
+          >{{ tab.icon }}</span>
+
+          <!-- Label -->
+          <span class="tv-tab-label">{{ tab.label }}</span>
+
+          <!-- Badge numérique -->
+          <span class="tv-tab-badge" *ngIf="tab.badge != null && tab.badge > 0">
+            {{ tab.badge > 99 ? '99+' : tab.badge }}
+          </span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Flèche droite -->
+    <span
+      class="tv-scroll-btn tv-scroll-btn--right" aria-hidden="true"
+      [class.tv-scroll-btn--visible]="canScrollRight"
+      (click)="scrollBar('right')"
+      aria-label="Défiler à droite"
+    >
+      <span class="material-symbols-outlined">chevron_right</span>
+    </span>
+
+  </div>
+  <!-- /bar-wrap -->
+
+  <!-- ══════════════════════════════════════════════════════════
+       CONTENU DE L'ONGLET ACTIF
+  ══════════════════════════════════════════════════════════ -->
+  <div class="tv-content">
+    <ng-container *ngFor="let tab of tabs">
+      <!-- Rendu lazy : le template est créé mais caché si inactif -->
+      <div
+        class="tv-pane"
+        [class.tv-pane--active]="isActive(tab.id)"
+        [attr.aria-hidden]="!isActive(tab.id)"
+        role="tabpanel" [attr.aria-labelledby]="'tv-tab-' + tab.id"
+        [id]="'tv-panel-' + tab.id"
+      >
+        <ng-container *ngIf="isActive(tab.id) && tab.template">
+          <ng-container *ngTemplateOutlet="tab.template"></ng-container>
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
+  <!-- /content -->
+
+</div>

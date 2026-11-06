@@ -1,0 +1,24 @@
+:host {
+  display: flex;
+  height: 100vh;
+  background-color: var(--art-surface-subtle);
+}
+.main-content {
+  margin-left: var(--main-margin-left, var(--art-sidebar-width));
+  padding: 0;
+  flex: 1;
+  font-family: var(--art-font-sans);
+  width: calc(100% - var(--main-margin-left, var(--art-sidebar-width)));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: margin-left var(--art-duration-base) var(--art-easing-standard), width var(--art-duration-base) var(--art-easing-standard);
+}
+/* Pendant le drag de redimensionnement : suivi 1:1 sans transition. */
+.main-content--resizing { transition: none; }
+.content-area { flex: 1; min-height: 0; overflow-y: auto; }
+
+@media (max-width: 767px) {
+  .main-content { margin-left: 0 !important; width: 100% !important; }
+}

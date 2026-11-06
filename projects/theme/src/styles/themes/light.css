@@ -1,0 +1,8 @@
+/* Thème clair : valeurs par défaut de tokens.css (aucune surcharge).
+   Fichier fourni pour symétrie : activer avec <html data-theme="light"> pour
+   forcer le clair quand un thème sombre est actif par ailleurs. */
+@layer art.themes {
+  [data-theme='light'] {
+    color-scheme: light;
+  }
+}

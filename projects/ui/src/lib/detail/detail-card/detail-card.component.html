@@ -1,0 +1,246 @@
+<!-- ================================================================
+     DETAIL-CARD — Collapsible info card
+================================================================ -->
+<div class="dc-card" [class.dc-card--collapsed]="isCollapsed">
+
+  <!-- ══════════════════════════════════ HEADER ══ -->
+  <div class="dc-header" (click)="toggleCollapse()" [class.collapsed]="isCollapsed">
+    <div class="dc-header-left">
+      <!-- Icon badge -->
+      <div class="dc-header-icon" *ngIf="config.icon">
+        <span class="material-symbols-outlined">{{ config.icon }}</span>
+      </div>
+      <div class="dc-header-text">
+        <h3 class="dc-title"><art-label [text]="config.title" [explanation]="config.explanation" [trigger]="config.explanationTrigger ?? 'click'" /></h3>
+        <p  class="dc-subtitle" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+      </div>
+    </div>
+
+    <div class="dc-header-right">
+      <!-- Collapsed → show 3-dot action menu -->
+      <div
+        class="dc-action-wrap"
+        *ngIf="isCollapsed && hasFooter"
+        (click)="toggleActionMenu($event)"
+        style="position:relative"
+      >
+        <button class="dc-action-trigger" [class.dc-action-trigger--open]="isActionMenuOpen">
+          <span class="material-symbols-outlined">more_vert</span>
+        </button>
+
+        <div class="dc-action-menu" *ngIf="isActionMenuOpen" (click)="$event.stopPropagation()">
+          <ng-container *ngFor="let btn of allButtons">
+            <button
+              class="dc-action-item"
+              [class]="'dc-action-item ' + getActionItemClass(btn.variant)"
+              (click)="onButton(btn.id, $event)"
+            >
+              <span class="material-symbols-outlined" *ngIf="btn.icon">{{ btn.icon }}</span>
+              {{ btn.label }}
+            </button>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Collapse chevron -->
+      <button class="dc-collapse-btn" (click)="toggleCollapse(); $event.stopPropagation()">
+        <span class="material-symbols-outlined">
+          {{ isCollapsed ? 'expand_more' : 'expand_less' }}
+        </span>
+      </button>
+    </div>
+  </div>
+  <!-- /header -->
+
+  <!-- ══════════════════════════════════ BODY ══ -->
+  <div class="dc-body" *ngIf="!isCollapsed">
+
+    <ng-container *ngFor="let section of config.sections; let si = index">
+      <div
+        class="dc-section"
+        [class.dc-section--not-first]="si > 0"
+        [style]="isMobile ? 'grid-template-columns:1fr' : gridStyle(section)"
+      >
+        <!-- Columns -->
+        <div class="dc-column" *ngFor="let col of section.columns">
+          <!-- Column title -->
+          <p class="dc-col-title" *ngIf="col.title"><art-label [text]="col.title" [explanation]="col.explanation" [trigger]="col.explanationTrigger ?? 'click'" /></p>
+
+          <!-- Section-columns inside column -->
+          <div class="row g-5">
+            <div
+              *ngFor="let secCol of col.sectionColumns"
+              [class]="'col-auto col-md-' + (secCol.colMd ?? 'auto')"
+            >
+              <div class="dc-sec-col">
+                <ng-container *ngFor="let field of secCol.fields">
+
+                  <div class="dc-field" *ngIf="field.attribute">
+                    <!-- Optional inline label -->
+                    <span class="dc-field-label" *ngIf="field.label"><art-label [text]="field.label" [explanation]="field.explanation" [trigger]="field.explanationTrigger ?? 'click'" /></span>
+
+                    <!-- ── IMAGE ────────────────────────────────────── -->
+                    <ng-container *ngIf="isImageField(field)">
+                      <div class="dc-img-wrap" *ngIf="rawValue(field)">
+                        <img
+                          [src]="rawValue(field)"
+                          [alt]="field.label ?? field.attribute"
+                          class="dc-img"
+                          [style]="field.style"
+                          [class]="field.cssClass"
+                        />
+                      </div>
+                      <span class="dc-empty-value" *ngIf="!rawValue(field)">—</span>
+                    </ng-container>
+
+                    <!-- ── BADGE ────────────────────────────────────── -->
+                    <ng-container *ngIf="isBadgeField(field)">
+                      <ng-container *ngIf="rawValue(field) != null">
+                        <!-- Filled badge -->
+                        <span
+                          *ngIf="(field.badgeStyle ?? 'filled') === 'filled'"
+                          class="dc-badge dc-badge--filled"
+                          [style]="'--badge-c:' + badgeColor(field) + ';' + (field.style ?? '')"
+                          [class]="field.cssClass"
+                        >
+                          <span class="dc-badge-dot"></span>
+                          {{ displayValue(field) }}
+                        </span>
+                        <!-- Outline badge -->
+                        <span
+                          *ngIf="field.badgeStyle === 'outline'"
+                          class="dc-badge dc-badge--outline"
+                          [style]="'--badge-c:' + badgeColor(field) + ';' + (field.style ?? '')"
+                          [class]="field.cssClass"
+                        >
+                          <span class="dc-badge-dot"></span>
+                          {{ displayValue(field) }}
+                        </span>
+                      </ng-container>
+                      <span class="dc-empty-value" *ngIf="rawValue(field) == null">—</span>
+                    </ng-container>
+
+                    <!-- ── MULTIBADGE ──────────────────────────────── -->
+                    <ng-container *ngIf="isMultibadge(field)">
+                      <div class="dc-multibadge-wrap">
+                        <ng-container *ngIf="multibadgeItems(field).length > 0">
+                          <span
+                            class="dc-multibadge-item"
+                            *ngFor="let item of multibadgeItems(field)"
+                            [style]="field.style"
+                            [class]="field.cssClass"
+                          >{{ item }}</span>
+                        </ng-container>
+                        <span class="dc-empty-value" *ngIf="multibadgeItems(field).length === 0">—</span>
+                      </div>
+                    </ng-container>
+
+                    <!-- ── LINK ────────────────────────────────────── -->
+                    <ng-container *ngIf="isLinkField(field)">
+                      <a
+                        *ngIf="rawValue(field)"
+                        [href]="field.isRedirectLink ? resolveLink(field) : null"
+                        [routerLink]="!field.isRedirectLink ? resolveLink(field) : null"
+                        [target]="field.linkTarget ?? '_self'"
+                        class="dc-link"
+                        [style]="field.style"
+                        [class]="field.cssClass"
+                      >
+                        <span class="material-symbols-outlined dc-link-icon">open_in_new</span>
+                        {{ displayValue(field) }}
+                      </a>
+                      <span class="dc-empty-value" *ngIf="!rawValue(field)">—</span>
+                    </ng-container>
+
+                    <!-- ── TEXT / NUMBER / DATE ───────────────────── -->
+                    <ng-container *ngIf="isNumberOrText(field)">
+                      <span
+                        *ngIf="displayValue(field)"
+                        [style]="field.style"
+                        [class]="field.cssClass ?? 'dc-value'"
+                      >
+                        {{ displayValue(field) }}
+                        <span class="dc-unit" *ngIf="field.unit"> {{ field.unit }}</span>
+                      </span>
+                      <span class="dc-empty-value" *ngIf="!displayValue(field)">—</span>
+                    </ng-container>
+
+                  </div>
+                  <!-- /dc-field -->
+
+                </ng-container>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /dc-column -->
+      </div>
+      <!-- /dc-section -->
+    </ng-container>
+
+  </div>
+  <!-- /body -->
+
+  <!-- ══════════════════════════════════ FOOTER ══ -->
+  <div class="dc-footer" *ngIf="!isCollapsed && hasFooter">
+
+    <!-- Left side -->
+    <div class="dc-footer-left">
+      <!-- Desktop: show left-position extra buttons directly -->
+      <ng-container *ngIf="!isMobile">
+        <button
+          *ngFor="let btn of leftButtons"
+          [class]="getBtnClass(btn.variant, btn.cssClass)"
+          [style]="btn.style"
+          (click)="onButton(btn.id, $event)"
+        >
+          <span class="material-symbols-outlined" *ngIf="btn.icon">{{ btn.icon }}</span>
+          {{ btn.label }}
+        </button>
+      </ng-container>
+
+      <!-- Mobile: extra buttons collapsed in a dropdown -->
+      <div
+        class="dc-action-wrap"
+        *ngIf="isMobile && mobileExtraButtons.length > 0"
+        style="position:relative"
+        (click)="toggleMobileMenu($event)"
+      >
+        <button class="dc-btn dc-btn--default" [class.dc-btn--active]="isMobileMenuOpen" style="padding: 0 10px;">
+          <span class="material-symbols-outlined">more_vert</span>
+<!--          <span class="material-symbols-outlined dc-mobile-chevron">-->
+<!--            {{ isMobileMenuOpen ? 'expand_less' : 'expand_more' }}-->
+<!--          </span>-->
+        </button>
+
+        <div class="dc-action-menu dc-action-menu--up" *ngIf="isMobileMenuOpen" (click)="$event.stopPropagation()">
+          <button
+            *ngFor="let btn of mobileExtraButtons"
+            class="dc-action-item"
+            [class]="'dc-action-item ' + getActionItemClass(btn.variant)"
+            (click)="onButton(btn.id, $event)"
+          >
+            <span class="material-symbols-outlined" *ngIf="btn.icon">{{ btn.icon }}</span>
+            {{ btn.label }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right side: default buttons (always visible) + desktop right-position extras -->
+    <div class="dc-footer-right">
+      <button
+        *ngFor="let btn of rightButtons"
+        [class]="getBtnClass(btn.variant, btn.cssClass)"
+        [style]="btn.style"
+        (click)="onButton(btn.id, $event)"
+      >
+        <span class="material-symbols-outlined" *ngIf="btn.icon">{{ btn.icon }}</span>
+        {{ btn.label }}
+      </button>
+    </div>
+  </div>
+  <!-- /footer -->
+
+</div>

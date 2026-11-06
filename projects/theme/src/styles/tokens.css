@@ -1,0 +1,342 @@
+/* ==========================================================================
+   @artis/theme — TOKENS PAR DÉFAUT
+   --------------------------------------------------------------------------
+   Source unique de vérité de la Direction Artistique. Les composants
+   @artis/* ne consomment QUE ces variables (aucune couleur / rayon / ombre /
+   espacement codé en dur).
+
+   Surcharge par projet : définir un fichier chargé APRÈS ce fichier, par ex.
+
+     :root { --art-primary-600: #7c3aed; --art-font-sans: 'Inter', sans-serif; }
+
+   Les tokens par défaut vivent dans @layer art.tokens : tout CSS non layerisé
+   du projet l'emporte automatiquement, sans avoir à augmenter la spécificité.
+
+   Convention de documentation : chaque token est précédé d'une ligne
+   « @doc <explication> » ; le script `npm run docs:tokens` génère
+   docs/TOKENS.md à partir de ces lignes.
+   ========================================================================== */
+
+@layer art.tokens, art.themes, art.base;
+
+@layer art.tokens {
+  :root {
+    /* ───────────── 1. COULEURS — PALETTES PRIMITIVES ───────────── */
+
+    /* @doc Blanc pur. Sert de base aux surfaces et au texte sur fond coloré. */
+    --art-white: #ffffff;
+    /* @doc Noir pur. Sert de base à la couleur des ombres et des voiles. */
+    --art-black: #000000;
+
+    /* @doc Neutres (nuances chaudes) : fonds, bordures, textes. 50 = le plus clair, 900 = le plus foncé. */
+    --art-neutral-50: #fafaf9;
+    --art-neutral-100: #f5f4f2;
+    --art-neutral-150: #edecea;
+    --art-neutral-200: #e7e5e4;
+    --art-neutral-300: #d6d3d1;
+    --art-neutral-400: #a8a29e;
+    --art-neutral-500: #78716c;
+    --art-neutral-600: #57534e;
+    --art-neutral-700: #44403c;
+    --art-neutral-800: #292524;
+    --art-neutral-900: #1c1917;
+
+    /* @doc Couleur primaire de la marque (échelle 50–900). Pilote boutons principaux, liens, focus, états actifs. */
+    --art-primary-50: #fff7ed;
+    --art-primary-100: #ffedd5;
+    --art-primary-200: #fed7aa;
+    --art-primary-300: #fdba74;
+    --art-primary-400: #fb923c;
+    --art-primary-500: #f97316;
+    --art-primary-600: #ea580c;
+    --art-primary-700: #c2410c;
+    --art-primary-800: #9a3412;
+    --art-primary-900: #7c2d12;
+
+    /* @doc Couleur secondaire : actions secondaires, éléments de structure sobres. */
+    --art-secondary-50: var(--art-neutral-50);
+    --art-secondary-100: var(--art-neutral-100);
+    --art-secondary-200: var(--art-neutral-200);
+    --art-secondary-300: var(--art-neutral-300);
+    --art-secondary-400: var(--art-neutral-400);
+    --art-secondary-500: var(--art-neutral-500);
+    --art-secondary-600: var(--art-neutral-600);
+    --art-secondary-700: var(--art-neutral-700);
+    --art-secondary-800: var(--art-neutral-800);
+    --art-secondary-900: var(--art-neutral-900);
+
+    /* @doc Couleur d'accent : mise en avant ponctuelle, distincte de la primaire (badges, nouveautés). */
+    --art-accent-50: #f5f3ff;
+    --art-accent-100: #ede9fe;
+    --art-accent-200: #ddd6fe;
+    --art-accent-500: #8b5cf6;
+    --art-accent-600: #7c3aed;
+    --art-accent-700: #6d28d9;
+
+    /* @doc Succès (vert). */
+    --art-success-50: #f0fdf4;
+    --art-success-100: #dcfce7;
+    --art-success-200: #bbf7d0;
+    --art-success-500: #22c55e;
+    --art-success-600: #16a34a;
+    --art-success-700: #15803d;
+
+    /* @doc Danger / erreur (rouge). */
+    --art-danger-50: #fef2f2;
+    --art-danger-100: #fee2e2;
+    --art-danger-200: #fecaca;
+    --art-danger-500: #ef4444;
+    --art-danger-600: #dc2626;
+    --art-danger-700: #b91c1c;
+
+    /* @doc Avertissement (ambre). */
+    --art-warning-50: #fffbeb;
+    --art-warning-100: #fef3c7;
+    --art-warning-200: #fde68a;
+    --art-warning-400: #fbbf24;
+    --art-warning-600: #d97706;
+    --art-warning-700: #b45309;
+
+    /* @doc Information (bleu). */
+    --art-info-50: #eff6ff;
+    --art-info-100: #dbeafe;
+    --art-info-200: #bfdbfe;
+    --art-info-600: #1a73e8;
+    --art-info-700: #1d4ed8;
+
+    /* ───────────── 2. COULEURS — SÉMANTIQUES (celles que les composants utilisent) ───────────── */
+
+    /* @doc Fond de page / zones de fond (footer, fond d'application). */
+    --art-bg: var(--art-neutral-50);
+    /* @doc Fond des cartes, champs, panneaux, modales. */
+    --art-surface: var(--art-white);
+    /* @doc Fond de surface légèrement teinté (en-têtes de tableau, zones secondaires). */
+    --art-surface-subtle: var(--art-neutral-100);
+    /* @doc Fond de surface plus marqué (survols neutres, pistes de barre de progression). */
+    --art-surface-muted: var(--art-neutral-150);
+    /* @doc Surface inversée (bulle d'info sombre, tooltips, boutons noirs). */
+    --art-inverse-surface: var(--art-neutral-900);
+    /* @doc Voile derrière les modales et menus mobiles. */
+    --art-overlay: color-mix(in srgb, var(--art-neutral-900) 45%, transparent);
+
+    /* @doc Bordure standard (séparateurs, contour des champs). */
+    --art-border: var(--art-neutral-200);
+    /* @doc Bordure renforcée (champ survolé, séparation marquée). */
+    --art-border-strong: var(--art-neutral-300);
+
+    /* @doc Texte principal. */
+    --art-text: var(--art-neutral-900);
+    /* @doc Texte secondaire (sous-titres, valeurs de second plan). */
+    --art-text-secondary: var(--art-neutral-700);
+    /* @doc Texte atténué (labels, légendes, aides). */
+    --art-text-muted: var(--art-neutral-500);
+    /* @doc Texte très discret (placeholders, icônes inactives). */
+    --art-text-subtle: var(--art-neutral-400);
+    /* @doc Texte sur fond inversé ou fond coloré plein. */
+    --art-text-inverse: var(--art-white);
+
+    /* @doc Couleur d'action principale (boutons pleins, liens, éléments actifs). */
+    --art-primary: var(--art-primary-600);
+    /* @doc Variante survol/pression de la couleur principale. */
+    --art-primary-hover: var(--art-primary-700);
+    /* @doc Couleur principale pour du texte sur fond teinté (contraste renforcé). */
+    --art-primary-strong: var(--art-primary-700);
+    /* @doc Variante claire de la couleur principale (accents, dégradés). */
+    --art-primary-light: var(--art-primary-500);
+    /* @doc Teinte très claire de la principale (survol de ligne/menu). */
+    --art-primary-soft: var(--art-primary-50);
+    /* @doc Teinte claire de la principale (élément sélectionné, puce active). */
+    --art-primary-softer: var(--art-primary-100);
+    /* @doc Bordure teintée de la principale. */
+    --art-primary-border: var(--art-primary-200);
+    /* @doc Texte sur fond de couleur principale. */
+    --art-on-primary: var(--art-white);
+
+    /* @doc Couleur d'accent sémantique. */
+    --art-accent: var(--art-accent-600);
+
+    /* @doc Succès sémantique : couleur d’action/texte, variante forte, fond doux (-soft/-softer) et bordure. */
+    --art-success: var(--art-success-600);
+    --art-success-strong: var(--art-success-700);
+    --art-success-soft: var(--art-success-50);
+    --art-success-softer: var(--art-success-100);
+    --art-success-border: var(--art-success-200);
+
+    /* @doc Danger sémantique : couleur d’action/texte, variante forte, fond doux (-soft/-softer) et bordure. */
+    --art-danger: var(--art-danger-600);
+    --art-danger-strong: var(--art-danger-700);
+    --art-danger-soft: var(--art-danger-50);
+    --art-danger-softer: var(--art-danger-100);
+    --art-danger-border: var(--art-danger-200);
+
+    /* @doc Avertissement sémantique : couleur, variante forte, variante claire, fond doux et bordure. */
+    --art-warning: var(--art-warning-600);
+    --art-warning-strong: var(--art-warning-700);
+    --art-warning-light: var(--art-warning-400);
+    --art-warning-soft: var(--art-warning-50);
+    --art-warning-softer: var(--art-warning-100);
+    --art-warning-border: var(--art-warning-200);
+
+    /* @doc Information sémantique : couleur, variante forte, fond doux et bordure. */
+    --art-info: var(--art-info-600);
+    --art-info-strong: var(--art-info-700);
+    --art-info-soft: var(--art-info-50);
+    --art-info-softer: var(--art-info-100);
+    --art-info-border: var(--art-info-200);
+
+    /* @doc Couleur de l'anneau de focus clavier (WCAG 2.4.7 / 2.4.11). */
+    --art-focus-color: var(--art-primary-500);
+    /* @doc Couleur de base des ombres (mélangée avec de la transparence). */
+    --art-shadow-color: var(--art-black);
+
+    /* ───────────── 3. TYPOGRAPHIE ───────────── */
+
+    /* @doc Famille de police principale de l'interface. */
+    --art-font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    /* @doc Famille monospace (code, valeurs secrètes, identifiants). */
+    --art-font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+    /* @doc Échelle de tailles : 2xs 10px · xs 11px · sm 12px · base 13px · md 14px · lg 16px · xl 18px · 2xl 20px · 3xl 24px · 4xl 32px. */
+    --art-text-2xs: 10px;
+    --art-text-xs: 11px;
+    --art-text-sm: 12px;
+    --art-text-base: 13px;
+    --art-text-md: 14px;
+    --art-text-lg: 16px;
+    --art-text-xl: 18px;
+    --art-text-2xl: 20px;
+    --art-text-3xl: 24px;
+    --art-text-4xl: 32px;
+
+    /* @doc Graisses de police. */
+    --art-weight-regular: 400;
+    --art-weight-medium: 500;
+    --art-weight-semibold: 600;
+    --art-weight-bold: 700;
+    --art-weight-extrabold: 800;
+
+    /* @doc Hauteurs de ligne : none=1, tight=1.2, snug=1.35, normal=1.5, relaxed=1.65. */
+    --art-leading-none: 1;
+    --art-leading-tight: 1.2;
+    --art-leading-snug: 1.35;
+    --art-leading-normal: 1.5;
+    --art-leading-relaxed: 1.65;
+
+    /* @doc Espacement des lettres. */
+    --art-tracking-tight: -0.01em;
+    --art-tracking-normal: 0;
+    --art-tracking-wide: 0.02em;
+
+    /* ───────────── 4. ESPACEMENTS (1 pas = 4px ; demi-pas = 2px) ───────────── */
+
+    /* @doc Échelle fine : pas numérique (0-5 = 2px, 1 = 4px, 1-5 = 6px, 2 = 8px …). */
+    --art-space-0-5: 2px;
+    --art-space-1: 4px;
+    --art-space-1-5: 6px;
+    --art-space-2: 8px;
+    --art-space-2-5: 10px;
+    --art-space-3: 12px;
+    --art-space-3-5: 14px;
+    --art-space-4: 16px;
+    --art-space-4-5: 18px;
+    --art-space-5: 20px;
+    --art-space-6: 24px;
+    --art-space-7: 28px;
+    --art-space-8: 32px;
+    --art-space-10: 40px;
+    --art-space-12: 48px;
+    --art-space-16: 64px;
+
+    /* @doc Alias lisibles : xs 4 · sm 8 · md 12 · lg 16 · xl 24 · 2xl 32 · 3xl 48 · 4xl 64. */
+    --art-space-xs: var(--art-space-1);
+    --art-space-sm: var(--art-space-2);
+    --art-space-md: var(--art-space-3);
+    --art-space-lg: var(--art-space-4);
+    --art-space-xl: var(--art-space-6);
+    --art-space-2xl: var(--art-space-8);
+    --art-space-3xl: var(--art-space-12);
+    --art-space-4xl: var(--art-space-16);
+
+    /* ───────────── 5. BORDURES ───────────── */
+
+    /* @doc Rayons : xs 4 · sm 6 · md 8 · lg 10 · xl 14 · 2xl 20 · full (pilule/cercle). */
+    --art-radius-xs: 4px;
+    --art-radius-sm: 6px;
+    --art-radius-md: 8px;
+    --art-radius-lg: 10px;
+    --art-radius-xl: 14px;
+    --art-radius-2xl: 20px;
+    --art-radius-full: 999px;
+
+    /* @doc Épaisseurs de bordure. */
+    --art-border-width: 1px;
+    --art-border-width-thick: 2px;
+    /* @doc Style de bordure par défaut. */
+    --art-border-style: solid;
+
+    /* ───────────── 6. OMBRES ───────────── */
+
+    /* @doc Ombre extra-légère (champs, puces). */
+    --art-shadow-xs: 0 1px 2px color-mix(in srgb, var(--art-shadow-color) 5%, transparent);
+    /* @doc Ombre légère (cartes au repos). */
+    --art-shadow-sm: 0 1px 4px color-mix(in srgb, var(--art-shadow-color) 7%, transparent), 0 1px 2px color-mix(in srgb, var(--art-shadow-color) 5%, transparent);
+    /* @doc Ombre moyenne (cartes survolées, menus). */
+    --art-shadow-md: 0 4px 14px color-mix(in srgb, var(--art-shadow-color) 9%, transparent), 0 2px 4px color-mix(in srgb, var(--art-shadow-color) 5%, transparent);
+    /* @doc Ombre forte (panneaux flottants). */
+    --art-shadow-lg: 0 12px 32px color-mix(in srgb, var(--art-shadow-color) 13%, transparent), 0 4px 8px color-mix(in srgb, var(--art-shadow-color) 6%, transparent);
+    /* @doc Ombre des éléments qui flottent au-dessus de tout (popups, dropdowns, toasts, modales). */
+    --art-shadow-popup: 0 8px 28px color-mix(in srgb, var(--art-shadow-color) 13%, transparent), 0 2px 6px color-mix(in srgb, var(--art-shadow-color) 6%, transparent);
+    /* @doc Anneau de focus (clavier). */
+    --art-shadow-focus: 0 0 0 3px color-mix(in srgb, var(--art-focus-color) 35%, transparent);
+
+    /* ───────────── 7. TRANSITIONS ───────────── */
+
+    /* @doc Durées : fast 150ms · base 200ms · slow 300ms. Mises à 0 si l'utilisateur préfère moins d'animations. */
+    --art-duration-fast: 150ms;
+    --art-duration-base: 200ms;
+    --art-duration-slow: 300ms;
+    /* @doc Courbes d'accélération. */
+    --art-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --art-easing-out: cubic-bezier(0, 0, 0.2, 1);
+    --art-easing-in: cubic-bezier(0.4, 0, 1, 1);
+    --art-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* ───────────── 8. Z-INDEX (échelle centralisée) ───────────── */
+
+    /* @doc Empilement : base 1 · raised 10 · sticky 20 · header 190 · sidebar 199 · dropdown 400 · popover 500 · overlay 600 · drawer 800 · modal 900 · toast 1100 · tooltip 1200. */
+    --art-z-base: 1;
+    --art-z-raised: 10;
+    --art-z-sticky: 20;
+    --art-z-header: 190;
+    --art-z-sidebar-backdrop: 198;
+    --art-z-sidebar: 199;
+    --art-z-sidebar-raised: 200;
+    --art-z-sidebar-flyout: 250;
+    --art-z-sidebar-tooltip: 300;
+    --art-z-dropdown: 400;
+    --art-z-popover: 500;
+    --art-z-overlay: 600;
+    --art-z-drawer: 800;
+    --art-z-modal: 900;
+    --art-z-toast: 1100;
+    --art-z-tooltip: 1200;
+
+    /* ───────────── 9. LAYOUT ───────────── */
+
+    /* @doc Largeur maximale du contenu. */
+    --art-container-max: 1200px;
+    /* @doc Largeur de la sidebar dépliée / repliée. */
+    --art-sidebar-width: 240px;
+    --art-sidebar-width-collapsed: 64px;
+    /* @doc Hauteur de l'en-tête applicatif. */
+    --art-header-height: 56px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --art-duration-fast: 0ms;
+      --art-duration-base: 0ms;
+      --art-duration-slow: 0ms;
+    }
+  }
+}

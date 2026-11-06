@@ -1,0 +1,128 @@
+<!-- ================================================================
+     EXPORT MODAL
+================================================================ -->
+<div class="export-overlay" (click)="close.emit()">
+  <div class="export-modal" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="export-modal-header">
+      <div class="export-modal-title-row">
+        <div class="export-modal-icon">
+          <span class="material-symbols-outlined">download</span>
+        </div>
+        <div>
+          <h3 class="export-modal-title">Exporter les données</h3>
+          <p class="export-modal-subtitle">{{ totalDataCount }} enregistrement(s) disponibles</p>
+        </div>
+      </div>
+      <button class="export-close-btn" (click)="close.emit()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Body (scrollable) -->
+    <div class="export-modal-body">
+
+      <!-- ── Format carousel ──────────────────────────────────── -->
+      <div class="export-section">
+        <p class="export-section-label">Format</p>
+        <div class="export-format-row">
+          <div
+            class="export-format-card"
+            *ngFor="let f of formats"
+            [class.export-format-card--active]="selectedFormat === f.id"
+            (click)="selectFormat(f.id)"
+            [style.--fmt-color]="f.color"
+          >
+            <span class="material-symbols-outlined export-fmt-icon">{{ f.icon }}</span>
+            <span class="export-fmt-label">{{ f.label }}</span>
+            <div class="export-fmt-check" *ngIf="selectedFormat === f.id">
+              <span class="material-symbols-outlined">check</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Columns ──────────────────────────────────────────── -->
+      <div class="export-section">
+        <div class="export-section-header-row">
+          <p class="export-section-label">Colonnes à exporter</p>
+          <div class="export-col-actions">
+            <button class="export-col-btn" (click)="selectAllColumns()">Tout</button>
+            <button class="export-col-btn" (click)="deselectAllColumns()">Aucun</button>
+          </div>
+        </div>
+        <div class="export-col-grid">
+          <label
+            class="export-col-item"
+            *ngFor="let col of columns"
+            [class.export-col-item--active]="selectedColumns.has(col.key)"
+          >
+            <input
+              type="checkbox"
+              [checked]="selectedColumns.has(col.key)"
+              (change)="toggleColumn(col.key)"
+            />
+            <span class="export-col-name">{{ col.title }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- ── Quantity / Page ──────────────────────────────────── -->
+      <div class="export-section">
+        <p class="export-section-label">Quantité de données</p>
+        <div class="export-page-options">
+          <label class="export-radio-item">
+            <input type="radio" [(ngModel)]="pageMode" value="all" />
+            <span class="export-radio-label">
+              <span class="material-symbols-outlined">select_all</span>
+              Toutes les données
+              <span class="export-radio-count">{{ totalDataCount }} lignes</span>
+            </span>
+          </label>
+          <label class="export-radio-item">
+            <input type="radio" [(ngModel)]="pageMode" value="current" />
+            <span class="export-radio-label">
+              <span class="material-symbols-outlined">layers</span>
+              Page actuelle
+              <span class="export-radio-count">{{ currentPageData.length }} lignes</span>
+            </span>
+          </label>
+          <label class="export-radio-item">
+            <input type="radio" [(ngModel)]="pageMode" value="page" />
+            <span class="export-radio-label">
+              <span class="material-symbols-outlined">article</span>
+              Page spécifique
+            </span>
+          </label>
+        </div>
+
+        <!-- Page selector -->
+        <div class="export-page-select" *ngIf="pageMode === 'page'">
+          <label class="export-select-label">Numéro de page</label>
+          <select class="export-select" [(ngModel)]="targetPage">
+            <option *ngFor="let p of pageOptions" [value]="p">Page {{ p }}</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+    <!-- /body -->
+
+    <!-- Footer -->
+    <div class="export-modal-footer">
+      <button class="export-cancel-btn" (click)="close.emit()">
+        Annuler
+      </button>
+      <button
+        class="export-submit-btn"
+        (click)="doExport()"
+        [disabled]="selectedColumns.size === 0"
+      >
+        <span class="material-symbols-outlined">download</span>
+        Exporter en {{ selectedFormat.toUpperCase() }}
+      </button>
+    </div>
+
+  </div>
+</div>

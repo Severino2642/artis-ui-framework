@@ -1,0 +1,81 @@
+<footer
+  class="art-footer"
+  [class.art-footer--offset]="offsetForSidebar"
+  [class.art-footer--minimal]="variant === 'minimal'"
+  [ngStyle]="hostStyle"
+>
+  <ng-container *ngIf="variant === 'full'">
+    <div class="art-footer__top">
+      <div class="art-footer__brand">
+        <div class="art-footer__mark" aria-hidden="true">
+          <img *ngIf="logoUrl" [src]="logoUrl" [alt]="companyName" class="art-footer__mark-img" />
+          <span *ngIf="!logoUrl">{{ companyName.charAt(0) }}</span>
+        </div>
+        <div class="art-footer__brand-text">
+          <span class="art-footer__brand-name">{{ companyName }}</span>
+          <p class="art-footer__tagline">{{ tagline }}</p>
+        </div>
+
+        <div class="art-footer__social" *ngIf="socialLinks.length">
+          <a
+            *ngFor="let social of socialLinks; trackBy: trackBySocialLabel"
+            class="art-footer__social-link"
+            [href]="social.href"
+            [attr.aria-label]="social.label"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <path [attr.d]="social.iconPath"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <nav class="art-footer__groups" aria-label="Liens du pied de page" *ngIf="linkGroups.length">
+        <div class="art-footer__group" *ngFor="let group of linkGroups; trackBy: trackByGroupTitle">
+          <h3 class="art-footer__group-title">{{ group.title }}</h3>
+          <ul class="art-footer__group-links">
+            <li *ngFor="let link of group.links; trackBy: trackByLinkLabel">
+              <a
+                *ngIf="link.external; else internalLink"
+                [href]="link.href"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="art-footer__link"
+              >
+                {{ link.label }}
+              </a>
+              <ng-template #internalLink>
+                <a [routerLink]="link.routerLink" class="art-footer__link">{{ link.label }}</a>
+              </ng-template>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <div class="art-footer__divider" *ngIf="showDivider"></div>
+  </ng-container>
+
+  <div class="art-footer__bottom">
+    <p class="art-footer__copyright">© {{ year }} {{ companyName }}. Tous droits réservés.</p>
+
+    <ul class="art-footer__legal" *ngIf="legalLinks.length">
+      <li *ngFor="let link of legalLinks; trackBy: trackByLinkLabel">
+        <a
+          *ngIf="link.external; else internalLegalLink"
+          [href]="link.href"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="art-footer__legal-link"
+        >
+          {{ link.label }}
+        </a>
+        <ng-template #internalLegalLink>
+          <a [routerLink]="link.routerLink" class="art-footer__legal-link">{{ link.label }}</a>
+        </ng-template>
+      </li>
+    </ul>
+  </div>
+</footer>

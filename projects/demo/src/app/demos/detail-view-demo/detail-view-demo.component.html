@@ -1,0 +1,26 @@
+<div class="container-fluid py-3">
+
+  <!-- Page header -->
+<!--  <div class="d-flex align-items-center gap-3 mb-4">-->
+<!--    <div style="width:42px;height:42px;background:#1C1917;border-radius:10px;display:flex;align-items:center;justify-content:center">-->
+<!--      <span class="material-symbols-outlined" style="color:white;font-size:20px">inventory_2</span>-->
+<!--    </div>-->
+<!--    <div>-->
+<!--      <h1 style="font-size:18px;font-weight:700;margin:0;color:#1C1917">Fiche Produit</h1>-->
+<!--      <p style="font-size:12px;color:#A8A29E;margin:0">{{ produit._id }}</p>-->
+<!--    </div>-->
+<!--  </div>-->
+
+  <art-detail-view
+    [config]="produitDetailConfig"
+    [data]="produit"
+    (buttonClick)="onButton($event)"
+  ></art-detail-view>
+
+  <!-- Debug panel -->
+  <div class="mt-3 p-3" *ngIf="lastEvent"
+       style="background:#F5F4F2;border-radius:10px;font-size:12px;font-family:monospace">
+    <strong>Dernier événement :</strong>
+    <pre style="margin:6px 0 0;white-space:pre-wrap;font-size:11px">{{ lastEvent | json }}</pre>
+  </div>
+</div>

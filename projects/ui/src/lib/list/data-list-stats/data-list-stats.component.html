@@ -1,0 +1,80 @@
+<!-- ================================================================
+     DL-STATS — Carousel mode & Invoice mode
+================================================================ -->
+
+<!-- ════ INVOICE MODE (footer summary) ════ -->
+<div class="stats-invoice" *ngIf="invoiceMode">
+  <div class="stats-invoice-item" *ngFor="let s of stats">
+    <span class="si-label">{{ s.title }}</span>
+    <span class="si-value">
+      {{ s.computedValue }}
+      <span class="si-unit" *ngIf="s.unit">{{ s.unit }}</span>
+    </span>
+  </div>
+</div>
+
+<!-- ════ CAROUSEL MODE ════ -->
+<div
+  class="stats-carousel"
+  *ngIf="!invoiceMode && stats.length > 0"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+>
+  <!-- Cards track -->
+  <div class="stats-track-wrapper">
+    <div
+      class="stats-track"
+      [style.transform]="'translateX(-' + (activePage * 100) + '%)'"
+    >
+      <!-- Virtual pages of 4 -->
+      <div class="stats-page" *ngFor="let page of [].constructor(totalPages); let pi = index">
+        <div
+          class="stat-card"
+          *ngFor="let s of stats.slice(pi * repartition, pi * repartition + repartition)"
+        >
+          <!-- Card top row -->
+          <div class="stat-card-top">
+            <div class="stat-info">
+              <p class="stat-subtitle" *ngIf="s.subtitle">{{ s.subtitle }}</p>
+              <p class="stat-title"><art-label [text]="s.title" [explanation]="s.explanation" [trigger]="s.explanationTrigger ?? 'click'" /></p>
+            </div>
+            <button class="stat-menu-btn">
+              <span class="material-symbols-outlined">
+                {{ s.icon ?? 'more_horiz' }}
+              </span>
+            </button>
+          </div>
+
+          <!-- Value row -->
+          <div class="stat-card-value-row">
+            <span class="stat-value">
+              {{ formatComputedValue(s) }}
+              <span class="stat-unit" *ngIf="s.unit">{{ s.unit }}</span>
+            </span>
+            <!-- Indicator badge -->
+            <span
+              class="stat-indicator"
+              [class]="getIndicatorClass(s)"
+              *ngIf="s.indicatorValue !== undefined"
+            >
+              <span class="material-symbols-outlined stat-ind-icon">
+                {{ s.indicatorStyle === 'negative' ? 'arrow_downward' : 'arrow_upward' }}
+              </span>
+              {{ s.indicatorValue > 0 ? '+' : '' }}{{ s.indicatorValue }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dot indicators -->
+  <div class="stats-dots" *ngIf="totalPages > 1">
+    <button
+      class="stats-dot"
+      *ngFor="let p of [].constructor(totalPages); let i = index"
+      [class.stats-dot--active]="activePage === i"
+      (click)="goToPage(i)"
+    ></button>
+  </div>
+</div>

@@ -1,0 +1,82 @@
+<!-- Sort dropdown -->
+<div class="sort-wrapper" [class.sort-wrapper--mobile]="isMobile">
+
+  <button class="dl-toolbar-btn" [class.dl-toolbar-btn--active]="isOpen" (click)="toggle()">
+    <span class="material-symbols-outlined">sort</span>
+    Trier
+    <span class="sort-badge" *ngIf="activeCount > 0">{{ activeCount }}</span>
+  </button>
+
+  <!-- Dropdown -->
+  <div class="sort-dropdown" *ngIf="isOpen" [class.sort-dropdown--centered]="isMobile">
+
+    <!-- Header -->
+    <div class="sort-dropdown-header">
+      <span class="sort-dd-title">Trier par</span>
+      <button class="sort-clear-btn" *ngIf="activeCount > 0" (click)="clearAll()">
+        <span class="material-symbols-outlined">close</span>
+        Effacer
+      </button>
+    </div>
+
+    <!-- Active sorts chips -->
+    <div class="sort-active-chips" *ngIf="sortKeys.length > 0">
+      <div class="sort-chip" *ngFor="let k of sortKeys">
+        <span class="material-symbols-outlined sort-chip-icon">
+          {{ sorts.get(k) === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+        </span>
+        <span class="sort-chip-label">{{ getLabel(k) }}</span>
+        <button class="sort-chip-remove" (click)="removeSort(k)">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sort-sep" *ngIf="sortKeys.length > 0"></div>
+
+    <!-- Field list -->
+    <div class="sort-field-list">
+      <div
+        class="sort-field-item"
+        *ngFor="let f of fields"
+        [class.sort-field-item--active]="sorts.has(f.key)"
+        [class.sort-field-item--open]="openFieldKey === f.key"
+      >
+        <!-- Field row -->
+        <div class="sort-field-row" (click)="toggleField(f.key, $event)">
+          <span class="material-symbols-outlined sort-field-icon">sort_by_alpha</span>
+          <span class="sort-field-label">{{ f.label }}</span>
+          <span class="sort-field-active-badge" *ngIf="sorts.has(f.key)">
+            {{ sorts.get(f.key) === 'asc' ? '↑' : '↓' }}
+          </span>
+          <span class="material-symbols-outlined sort-field-chevron">
+            {{ openFieldKey === f.key ? 'expand_less' : 'expand_more' }}
+          </span>
+        </div>
+
+        <!-- Direction sub-menu -->
+        <div class="sort-dir-menu" *ngIf="openFieldKey === f.key">
+          <div
+            class="sort-dir-item"
+            [class.sort-dir-item--selected]="sorts.get(f.key) === 'asc'"
+            (click)="pickDirection(f.key, 'asc', $event)"
+          >
+            <span class="material-symbols-outlined">arrow_upward</span>
+            Croissant (A → Z)
+            <span class="material-symbols-outlined sort-dir-check" *ngIf="sorts.get(f.key) === 'asc'">check</span>
+          </div>
+          <div
+            class="sort-dir-item"
+            [class.sort-dir-item--selected]="sorts.get(f.key) === 'desc'"
+            (click)="pickDirection(f.key, 'desc', $event)"
+          >
+            <span class="material-symbols-outlined">arrow_downward</span>
+            Décroissant (Z → A)
+            <span class="material-symbols-outlined sort-dir-check" *ngIf="sorts.get(f.key) === 'desc'">check</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

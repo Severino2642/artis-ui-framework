@@ -1,0 +1,318 @@
+<!-- ================================================================
+     DATA-LIST — Main component (3 layout modes)
+================================================================ -->
+<div class="dl-wrapper" *ngIf="config" #parentDiv>
+
+  <!-- ════════════════════════════════════════════════════════
+       LAYOUT: FULL — 3 separate sections
+  ═════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="layoutMode === 'full'">
+
+    <!-- ── SECTION 1: Toolbar ────────────────────────────────── -->
+    <div class="dl-toolbar-section">
+      <ng-container *ngTemplateOutlet="toolbarTpl"></ng-container>
+    </div>
+
+    <!-- ── SECTION 2: Stats carousel ────────────────────────── -->
+    <div class="dl-stats-section" *ngIf="hasStats">
+      <art-dl-stats [stats]="computedStats" [invoiceMode]="false"></art-dl-stats>
+    </div>
+
+    <!-- ── SECTION 3: Table / Cards ─────────────────────────── -->
+    <div class="dl-list-section" [class.onglet]="config.isInOnglet">
+      <div class="dl-compact-header">
+        <div class="dl-icon-wrap">
+          <span class="material-symbols-outlined">list_alt</span>
+        </div>
+        <div class="dl-compact-title-wrap">
+          <h2 class="dl-compact-title" *ngIf="config.title">Details</h2>
+          <p class="dl-compact-subtitle" *ngIf="config.subtitle">Liste d'éléments</p>
+        </div>
+        <ng-container *ngTemplateOutlet="toolbarActionsTplForTableHeader"></ng-container>
+      </div>
+      <ng-container *ngTemplateOutlet="tableTpl"></ng-container>
+    </div>
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════════════
+       LAYOUT: COMPACT — Toolbar inside table header
+  ═════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="layoutMode === 'compact'">
+
+    <!-- ── SECTION 2: Stats (separate, above table) ─────────── -->
+    <div class="dl-stats-section" *ngIf="hasStats">
+      <art-dl-stats [stats]="computedStats" [invoiceMode]="false"></art-dl-stats>
+    </div>
+
+    <!-- ── SECTION 3: Table with embedded toolbar header ─────── -->
+    <div class="dl-list-section" [class.onglet]="config.isInOnglet">
+      <!-- Embedded toolbar -->
+      <div class="dl-compact-header">
+        <div class="dl-compact-title-wrap">
+          <h2 class="dl-compact-title" *ngIf="config.title"><art-label [text]="config.title" [explanation]="config.explanation" [trigger]="config.explanationTrigger ?? 'click'" /></h2>
+          <p class="dl-compact-subtitle" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+        </div>
+        <div class="dl-toolbar-right">
+          <ng-container *ngTemplateOutlet="toolbarActionsTpl"></ng-container>
+          <ng-container *ngIf="isMobile">
+            <art-dl-sort
+              *ngIf="config.sortFields?.length"
+              [fields]="config.sortFields!"
+              [isMobile]="isMobile"
+              [activeSorts]="activeSorts"
+              (sortChange)="onSortChange($event)"
+            ></art-dl-sort>
+          </ng-container>
+          <ng-container *ngTemplateOutlet="toolbarActionsTplForTableHeader"></ng-container>
+        </div>
+      </div>
+      <ng-container *ngTemplateOutlet="tableTpl"></ng-container>
+    </div>
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════════════
+       LAYOUT: INVOICE — Toolbar in header, stats in footer
+  ═════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="layoutMode === 'invoice'">
+    <div class="dl-list-section" [class.onglet]="config.isInOnglet">
+      <!-- Embedded toolbar header -->
+      <div class="dl-compact-header">
+        <div class="dl-compact-title-wrap">
+          <h2 class="dl-compact-title" *ngIf="config.title"><art-label [text]="config.title" [explanation]="config.explanation" [trigger]="config.explanationTrigger ?? 'click'" /></h2>
+          <p class="dl-compact-subtitle" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+        </div>
+        <ng-container *ngTemplateOutlet="toolbarActionsTpl"></ng-container>
+      </div>
+      <!-- Table -->
+      <ng-container *ngTemplateOutlet="tableTpl"></ng-container>
+      <!-- Stats in invoice mode (footer) -->
+      <div class="dl-invoice-footer" *ngIf="hasStats">
+        <art-dl-stats [stats]="computedStats" [invoiceMode]="true"></art-dl-stats>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── Export modal ─────────────────────────────────────────── -->
+  <art-dl-export-modal
+    *ngIf="showExportModal"
+    [columns]="visibleColumns"
+    [allData]="processedData"
+    [currentPageData]="currentPageData"
+    [totalDataCount]="config.totalCount ?? processedData.length"
+    [isAutoPagination]="config.isAutoPagination !== false"
+    [totalPages]="totalPages"
+    [currentPage]="currentPage"
+    [listTitle]="config.title ?? 'Export'"
+    (close)="showExportModal = false"
+    (fetchPage)="exportFetchPage.emit($event)"
+  ></art-dl-export-modal>
+
+  <!-- ── Filter panel (mobile modal / bottom sheet) ───────────── -->
+  <div class="dl-filter-modal-overlay" *ngIf="showFilterPanel && isMobile" (click)="showFilterPanel = false">
+    <div class="dl-filter-modal" (click)="$event.stopPropagation()">
+      <art-dl-filter
+        [filterConfig]="effectiveFilterConfig"
+        [columns]="visibleColumns"
+        [filterValues]="activeFilters"
+        [isMobile]="true"
+        (apply)="onFilterApply($event)"
+        (reset)="showFilterPanel = false"
+        (closePanel)="showFilterPanel = false"
+      ></art-dl-filter>
+    </div>
+  </div>
+
+  <!-- ── Filter panel (desktop dropdown) ──────────────────────── -->
+  <div class="dl-filter-dropdown" *ngIf="showFilterPanel && !isMobile">
+    <art-dl-filter
+      [filterConfig]="effectiveFilterConfig"
+      [columns]="visibleColumns"
+      [filterValues]="activeFilters"
+      [isMobile]="false"
+      (apply)="onFilterApply($event)"
+      (reset)="showFilterPanel = false"
+      (closePanel)="showFilterPanel = false"
+    ></art-dl-filter>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TEMPLATES
+═══════════════════════════════════════════════════════════ -->
+
+<!-- Toolbar (full section) -->
+<ng-template #toolbarTpl>
+  <div class="dl-toolbar">
+    <!-- Left: Title + Filter + Sort -->
+    <div class="dl-toolbar-left">
+      <div class="dl-toolbar-title-wrap" *ngIf="config.title">
+        <h2 class="dl-title"><art-label [text]="config.title!" [explanation]="config.explanation" [trigger]="config.explanationTrigger ?? 'click'" /></h2>
+        <p class="dl-subtitle" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+      </div>
+    </div>
+    <!-- Right actions -->
+    <div class="dl-toolbar-right" *ngIf="!isMobile">
+      <ng-container *ngTemplateOutlet="filterSortTpl"></ng-container>
+      <div class="border" style="width: 1px;height: 25px;"></div>
+      <ng-container *ngTemplateOutlet="toolbarActionsTpl"></ng-container>
+    </div>
+  </div>
+  <div class="dl-toolbar pt-0" *ngIf="isMobile">
+    <!-- Left: Title + Filter + Sort -->
+    <div class="dl-toolbar-left">
+      <ng-container *ngTemplateOutlet="filterSortTpl"></ng-container>
+    </div>
+    <!-- Right actions -->
+    <div class="dl-toolbar-right">
+      <ng-container *ngTemplateOutlet="toolbarActionsTpl"></ng-container>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Filter + Sort buttons (shared) -->
+<ng-template #filterSortTpl>
+  <button
+    class="dl-btn dl-btn--default"
+    [class.dl-btn--active]="showFilterPanel || filterActive"
+    (click)="toggleFilterPanel()"
+  >
+    <span class="material-symbols-outlined">tune</span>
+    Filtrer
+    <span class="dl-filter-badge" *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</span>
+  </button>
+
+  <art-dl-sort
+    *ngIf="config.sortFields?.length"
+    [fields]="config.sortFields!"
+    [isMobile]="isMobile"
+    [activeSorts]="activeSorts"
+    (sortChange)="onSortChange($event)"
+  ></art-dl-sort>
+</ng-template>
+
+<!-- Right toolbar actions (shared across layouts) -->
+<ng-template #toolbarActionsTpl>
+
+  <!-- Mobile: actions dropdown -->
+  <div class="dl-actions-dropdown" *ngIf="isMobile">
+    <button class="dl-btn dl-btn--icon" (click)="toggleToolbarActions()" title="Actions">
+      <span class="material-symbols-outlined">more_vert</span>
+    </button>
+    <div class="dl-actions-menu" *ngIf="showToolbarActions" [class.dropdown--centered]="isMobile">
+      <ng-container *ngIf="layoutMode === 'compact'">
+        <button
+          class="dl-action-item"
+          [class.dl-btn--active]="showFilterPanel || filterActive"
+          (click)="toggleFilterPanel()"
+          title="Actualiser">
+          <span class="material-symbols-outlined">tune</span>
+          Filtrer
+          <span class="dl-filter-badge" *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</span>
+        </button>
+      </ng-container>
+      <button class="dl-action-item" (click)="onRefresh(); showToolbarActions = false" title="Actualiser">
+        <span class="material-symbols-outlined">refresh</span>
+        Actualiser
+      </button>
+      <div class="dl-action-sep" *ngIf="config.toolbarButtons && config.toolbarButtons.length > 0"></div>
+      <ng-container *ngFor="let btn of config.toolbarButtons">
+        <button
+          class="dl-action-item"
+          (click)="onToolbarButton(btn.id); showToolbarActions = false"
+        >
+          <span class="material-symbols-outlined" *ngIf="btn.icon">{{ btn.icon }}</span>
+          {{ btn.label }}
+        </button>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Desktop: inline actions -->
+  <ng-container *ngIf="!isMobile">
+    <ng-container *ngIf="layoutMode === 'compact'">
+      <button
+        class="dl-btn dl-btn--default"
+        [class.dl-btn--active]="showFilterPanel || filterActive"
+        (click)="toggleFilterPanel()"
+      >
+        <span class="material-symbols-outlined">tune</span>
+        Filtrer
+        <span class="dl-filter-badge" *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</span>
+      </button>
+      <art-dl-sort
+        *ngIf="config.sortFields?.length"
+        [fields]="config.sortFields!"
+        [isMobile]="isMobile"
+        [activeSorts]="activeSorts"
+        (sortChange)="onSortChange($event)"
+      ></art-dl-sort>
+    </ng-container>
+    <button class="dl-btn dl-btn--icon" (click)="onRefresh()" title="Actualiser">
+      <span class="material-symbols-outlined">refresh</span>
+    </button>
+    <button
+      *ngFor="let btn of config.toolbarButtons"
+      [class]="getToolbarBtnClass(btn.variant)"
+      (click)="onToolbarButton(btn.id)"
+    >
+      <span class="material-symbols-outlined" *ngIf="btn.icon">{{ btn.icon }}</span>
+      {{ btn.label }}
+    </button>
+  </ng-container>
+</ng-template>
+
+<!-- Right toolbar actions for table header (shared across layouts) -->
+<ng-template #toolbarActionsTplForTableHeader>
+  <!-- View toggle -->
+  <button
+    *ngIf="!isMobile"
+    class="dl-btn dl-btn--icon"
+    (click)="toggleViewMode()"
+    [title]="viewMode === 'table' ? 'Vue carte' : 'Vue tableau'"
+  >
+    <span class="material-symbols-outlined">
+      {{ viewMode === 'table' ? 'view_agenda' : 'table_rows' }}
+    </span>
+  </button>
+
+  <!-- Export -->
+  <button class="dl-btn dl-btn--default" (click)="toggleExportModal()">
+    <span class="material-symbols-outlined">download</span>
+    <span class="dl-btn-label-md">Exporter</span>
+  </button>
+</ng-template>
+
+<!-- Table / Card + Pagination -->
+<ng-template #tableTpl>
+  <div #tableContainer style="width:100%">
+    <art-dl-table
+      [columns]="visibleColumns"
+      [actions]="config.actions ?? []"
+      [showActions]="config.showActions !== false && (config.actions?.length ?? 0) > 0"
+      [showCheckbox]="config.showCheckbox === true"
+      [viewMode]="viewMode"
+      [isMobile]="isMobile"
+      [data]="currentPageData"
+      [allData]="processedData"
+      [pageSize]="config.pageSize ?? 10"
+      [isAutoPagination]="config.isAutoPagination !== false"
+      [totalCount]="config.totalCount ?? processedData.length"
+      [currentPage]="currentPage"
+      [selectedButtonLabel]="config.selectedButtonLabel ?? 'Actions'"
+      [selectedButtonIcon]="config.selectedButtonIcon ?? 'checklist'"
+      (actionClick)="actionClick.emit($event)"
+      (selectionChange)="$event"
+      (selectedAction)="selectionAction.emit($event)"
+      (pageChange)="onPageChange($event)"
+      [activeSorts]="activeSorts"
+      [activeFilters]="activeFilters"
+      [columnFilterFields]="columnFilterFields"
+      (sortChange)="onSortChange($event)"
+      (columnFilter)="onColumnFilter($event)"
+      (cellFilter)="onCellFilter($event)"
+    ></art-dl-table>
+  </div>
+</ng-template>

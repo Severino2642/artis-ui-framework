@@ -1,0 +1,12 @@
+/* ============================================================================
+   FICHIER DE THÈME DU PROJET — l'unique endroit où ce projet définit sa DA.
+   Chargé APRÈS @artis/theme : toute valeur ici remplace celle du framework
+   (sans toucher au framework). Décommentez pour tester :
+
+   :root {
+     --art-primary-600: #7c3aed;       // couleur de marque
+     --art-primary-700: #6d28d9;
+     --art-font-sans: 'Inter', system-ui, sans-serif;
+     --art-radius-md: 2px;
+   }
+   ============================================================================ */

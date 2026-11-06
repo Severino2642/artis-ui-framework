@@ -1,0 +1,19 @@
+<div class="container-fluid py-3">
+  <art-data-list
+    [config]="produitListConfig"
+    [data]="produits"
+    [filterPanelConfig]="produitFilterConfig"
+    (filterApply)="onFilter($event)"
+    (sortChange)="onSort($event)"
+    (actionClick)="onAction($event)"
+    (selectionAction)="onSelection($event)"
+    (pageChange)="onPage($event)"
+    (toolbarAction)="onToolbar($event)"
+  ></art-data-list>
+
+  <!-- Debug -->
+  <div class="mt-3 p-3" style="background:#F5F4F2;border-radius:10px;font-size:12px" *ngIf="lastEvent">
+    <strong>Dernier événement :</strong>
+    <pre style="margin:6px 0 0;white-space:pre-wrap">{{ lastEvent | json }}</pre>
+  </div>
+</div>

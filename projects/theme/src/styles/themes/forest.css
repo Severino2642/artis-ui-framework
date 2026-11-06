@@ -1,0 +1,40 @@
+/* Thème de marque « Forest » (exemple de marque Y) : primaire vert profond,
+   neutres chauds verdâtres, rayons très arrondis, police serif pour l'identité.
+   Activer avec <html data-theme="forest">. */
+@layer art.themes {
+  [data-theme='forest'] {
+    --art-neutral-50: #f7f8f5;
+    --art-neutral-100: #f0f2ec;
+    --art-neutral-150: #e7eae0;
+    --art-neutral-200: #dde1d3;
+    --art-neutral-300: #c3c9b6;
+    --art-neutral-400: #9aa28a;
+    --art-neutral-500: #737c63;
+    --art-neutral-600: #59614c;
+    --art-neutral-700: #444b3a;
+    --art-neutral-800: #2c3125;
+    --art-neutral-900: #1a1d15;
+
+    --art-primary-50: #f0fdf4;
+    --art-primary-100: #dcfce7;
+    --art-primary-200: #bbf7d0;
+    --art-primary-300: #86efac;
+    --art-primary-400: #4ade80;
+    --art-primary-500: #22a559;
+    --art-primary-600: #15803d;
+    --art-primary-700: #166534;
+    --art-primary-800: #14532d;
+    --art-primary-900: #052e16;
+
+    --art-accent-600: #b45309;
+
+    --art-font-sans: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+
+    --art-radius-xs: 6px;
+    --art-radius-sm: 8px;
+    --art-radius-md: 12px;
+    --art-radius-lg: 16px;
+    --art-radius-xl: 20px;
+    --art-radius-2xl: 28px;
+  }
+}

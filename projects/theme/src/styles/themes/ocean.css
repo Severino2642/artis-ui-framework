@@ -1,0 +1,40 @@
+/* Thème de marque « Ocean » (exemple de marque X) : primaire bleu-pétrole,
+   neutres froids, police Inter, angles plus nets.
+   Activer avec <html data-theme="ocean">. Un seul thème actif à la fois. */
+@layer art.themes {
+  [data-theme='ocean'] {
+    --art-neutral-50: #f8fafc;
+    --art-neutral-100: #f1f5f9;
+    --art-neutral-150: #e8eef5;
+    --art-neutral-200: #e2e8f0;
+    --art-neutral-300: #cbd5e1;
+    --art-neutral-400: #94a3b8;
+    --art-neutral-500: #64748b;
+    --art-neutral-600: #475569;
+    --art-neutral-700: #334155;
+    --art-neutral-800: #1e293b;
+    --art-neutral-900: #0f172a;
+
+    --art-primary-50: #ecfeff;
+    --art-primary-100: #cffafe;
+    --art-primary-200: #a5f3fc;
+    --art-primary-300: #67e8f9;
+    --art-primary-400: #22d3ee;
+    --art-primary-500: #06b6d4;
+    --art-primary-600: #0e7490;
+    --art-primary-700: #155e75;
+    --art-primary-800: #164e63;
+    --art-primary-900: #083344;
+
+    --art-accent-600: #db2777;
+
+    --art-font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --art-radius-xs: 2px;
+    --art-radius-sm: 3px;
+    --art-radius-md: 4px;
+    --art-radius-lg: 6px;
+    --art-radius-xl: 8px;
+    --art-radius-2xl: 12px;
+  }
+}

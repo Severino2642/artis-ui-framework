@@ -1,0 +1,85 @@
+/* Thème sombre — activer avec <html data-theme="dark"> (ou ThemeService.set('dark')). */
+@layer art.themes {
+  [data-theme='dark'] {
+    color-scheme: dark;
+
+    /* Échelles primitives INVERSÉES : tout composant qui référence directement une primitive
+       (ex. --art-neutral-900 pour du texte) s'adapte automatiquement au sombre. */
+    --art-neutral-50: #131110;
+    --art-neutral-100: #24201e;
+    --art-neutral-150: #2e2926;
+    --art-neutral-200: #36312d;
+    --art-neutral-300: #4a443f;
+    --art-neutral-400: #78716c;
+    --art-neutral-500: #a8a29e;
+    --art-neutral-600: #c4bfba;
+    --art-neutral-700: #d6d3d1;
+    --art-neutral-800: #e7e5e4;
+    --art-neutral-900: #f5f4f2;
+
+    --art-primary-50: #2a1a10;
+    --art-primary-100: #3a2214;
+    --art-primary-200: #5c3317;
+    --art-primary-300: #9a4a1a;
+    --art-primary-400: #fb923c;
+    --art-primary-500: #f97316;
+    --art-primary-600: #f97316;
+    --art-primary-700: #fb923c;
+    --art-primary-800: #fdba74;
+    --art-primary-900: #fed7aa;
+
+    --art-bg: #131110;
+    --art-surface: #1c1917;
+    --art-surface-subtle: #24201e;
+    --art-surface-muted: #2e2926;
+    --art-inverse-surface: #f5f4f2;
+    --art-overlay: color-mix(in srgb, #000 62%, transparent);
+
+    --art-border: #36312d;
+    --art-border-strong: #4a443f;
+
+    --art-text: #f5f4f2;
+    --art-text-secondary: #d6d3d1;
+    --art-text-muted: #a8a29e;
+    --art-text-subtle: #78716c;
+    --art-text-inverse: #1c1917;
+
+    --art-primary: var(--art-primary-500);
+    --art-primary-hover: var(--art-primary-400);
+    --art-primary-strong: #fdba74;
+    --art-primary-light: var(--art-primary-400);
+    --art-primary-soft: color-mix(in srgb, var(--art-primary-500) 12%, var(--art-surface));
+    --art-primary-softer: color-mix(in srgb, var(--art-primary-500) 22%, var(--art-surface));
+    --art-primary-border: color-mix(in srgb, var(--art-primary-500) 45%, var(--art-surface));
+    --art-on-primary: #1c1917;
+
+    --art-success: #4ade80;
+    --art-success-strong: #86efac;
+    --art-success-soft: color-mix(in srgb, #22c55e 12%, var(--art-surface));
+    --art-success-softer: color-mix(in srgb, #22c55e 22%, var(--art-surface));
+    --art-success-border: color-mix(in srgb, #22c55e 45%, var(--art-surface));
+
+    --art-danger: #f87171;
+    --art-danger-strong: #fca5a5;
+    --art-danger-soft: color-mix(in srgb, #ef4444 12%, var(--art-surface));
+    --art-danger-softer: color-mix(in srgb, #ef4444 22%, var(--art-surface));
+    --art-danger-border: color-mix(in srgb, #ef4444 45%, var(--art-surface));
+
+    --art-warning: #fbbf24;
+    --art-warning-strong: #fcd34d;
+    --art-warning-light: #fbbf24;
+    --art-warning-soft: color-mix(in srgb, #f59e0b 12%, var(--art-surface));
+    --art-warning-softer: color-mix(in srgb, #f59e0b 22%, var(--art-surface));
+    --art-warning-border: color-mix(in srgb, #f59e0b 45%, var(--art-surface));
+
+    --art-info: #60a5fa;
+    --art-info-strong: #93c5fd;
+    --art-info-soft: color-mix(in srgb, #3b82f6 12%, var(--art-surface));
+    --art-info-softer: color-mix(in srgb, #3b82f6 22%, var(--art-surface));
+    --art-info-border: color-mix(in srgb, #3b82f6 45%, var(--art-surface));
+
+    --art-accent: #a78bfa;
+    --art-focus-color: var(--art-primary-400);
+    --art-shadow-color: #000;
+  }
+}
